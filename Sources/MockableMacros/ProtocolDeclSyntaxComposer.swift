@@ -34,13 +34,11 @@ struct ProtocolDeclSyntaxComposer {
 		}
 		
 		let mockClass = """
-		#if DEBUG
 		\(accessLevel) class \(mockClassName): \(protoConformanceName)\(sendableConformance) {
 			\(accessLevel) init() { }
 			
 			\(impl)
 		}
-		#endif
 		"""
 		
 		return mockClass
