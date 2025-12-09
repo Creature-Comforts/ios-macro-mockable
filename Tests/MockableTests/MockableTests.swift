@@ -24,7 +24,6 @@ class MockableTests: XCTestCase {
 				func run()
 			}
 			
-			#if DEBUG
 			internal class MockMyService: MyService {
 				internal init() {
 				}
@@ -34,7 +33,6 @@ class MockableTests: XCTestCase {
 					runCalled = true
 				}
 			}
-			#endif
 			""",
 			macros: ["Mockable": MockableMacro.self]
 		)
@@ -54,7 +52,6 @@ class MockableTests: XCTestCase {
 				func run() async
 			}
 
-			#if DEBUG
 			internal class MockMyService: MyService {
 				internal init() {
 				}
@@ -64,7 +61,6 @@ class MockableTests: XCTestCase {
 					runCalled = true
 				}
 			}
-			#endif
 			""",
 			macros: ["Mockable": MockableMacro.self]
 		)
@@ -85,8 +81,7 @@ class MockableTests: XCTestCase {
 				@MainActor
 				func run() async
 			}
-			
-			#if DEBUG
+
 			internal class MockMyService: MyService {
 				internal init() {
 				}
@@ -97,7 +92,6 @@ class MockableTests: XCTestCase {
 					runCalled = true
 				}
 			}
-			#endif
 			""",
 			macros: ["Mockable": MockableMacro.self]
 		)
@@ -119,7 +113,6 @@ class MockableTests: XCTestCase {
 				func run() async
 			}
 			
-			#if DEBUG
 			internal class MockMyService: MyService {
 				internal init() {
 				}
@@ -130,7 +123,6 @@ class MockableTests: XCTestCase {
 					runCalled = true
 				}
 			}
-			#endif
 			""",
 			macros: ["Mockable": MockableMacro.self]
 		)
@@ -150,7 +142,6 @@ class MockableTests: XCTestCase {
 				func run() throws
 			}
 			
-			#if DEBUG
 			internal class MockMyService: MyService {
 				internal init() {
 				}
@@ -164,7 +155,6 @@ class MockableTests: XCTestCase {
 					}
 				}
 			}
-			#endif
 			""",
 			macros: ["Mockable": MockableMacro.self]
 		)
@@ -184,7 +174,6 @@ class MockableTests: XCTestCase {
 				func run() async throws
 			}
 
-			#if DEBUG
 			internal class MockMyService: MyService {
 				internal init() {
 				}
@@ -198,7 +187,6 @@ class MockableTests: XCTestCase {
 					}
 				}
 			}
-			#endif
 			""",
 			macros: ["Mockable": MockableMacro.self]
 		)
@@ -218,7 +206,6 @@ class MockableTests: XCTestCase {
 				func run() -> String?
 			}
 
-			#if DEBUG
 			internal class MockMyService: MyService {
 				internal init() {
 				}
@@ -230,7 +217,6 @@ class MockableTests: XCTestCase {
 					return runReturnValue
 				}
 			}
-			#endif
 			""",
 			macros: ["Mockable": MockableMacro.self]
 		)
@@ -250,7 +236,6 @@ class MockableTests: XCTestCase {
 				func run(arg1: String)
 			}
 
-			#if DEBUG
 			internal class MockMyService: MyService {
 				internal init() {
 				}
@@ -262,7 +247,6 @@ class MockableTests: XCTestCase {
 					runArg1 = arg1
 				}
 			}
-			#endif
 			""",
 			macros: ["Mockable": MockableMacro.self]
 		)
@@ -282,7 +266,6 @@ class MockableTests: XCTestCase {
 				func run(argument arg1: String)
 			}
 
-			#if DEBUG
 			internal class MockMyService: MyService {
 				internal init() {
 				}
@@ -294,7 +277,6 @@ class MockableTests: XCTestCase {
 					runArg1 = arg1
 				}
 			}
-			#endif
 			""",
 			macros: ["Mockable": MockableMacro.self]
 		)
@@ -314,7 +296,6 @@ class MockableTests: XCTestCase {
 				func run(callback: () -> Void)
 			}
 
-			#if DEBUG
 			internal class MockMyService: MyService {
 				internal init() {
 				}
@@ -326,7 +307,6 @@ class MockableTests: XCTestCase {
 					runCallback = callback
 				}
 			}
-			#endif
 			""",
 			macros: ["Mockable": MockableMacro.self]
 		)
@@ -346,7 +326,6 @@ class MockableTests: XCTestCase {
 				func run(before: @escaping (Int) -> String, callback: () -> Void)
 			}
 
-			#if DEBUG
 			internal class MockMyService: MyService {
 				internal init() {
 				}
@@ -360,7 +339,6 @@ class MockableTests: XCTestCase {
 					runCallback = callback
 				}
 			}
-			#endif
 			""",
 			macros: ["Mockable": MockableMacro.self]
 		)
@@ -380,7 +358,6 @@ class MockableTests: XCTestCase {
 				func run(callback: (() -> Void)?)
 			}
 
-			#if DEBUG
 			internal class MockMyService: MyService {
 				internal init() {
 				}
@@ -392,7 +369,6 @@ class MockableTests: XCTestCase {
 					runCallback = callback
 				}
 			}
-			#endif
 			""",
 			macros: ["Mockable": MockableMacro.self]
 		)
@@ -412,7 +388,6 @@ class MockableTests: XCTestCase {
 				func run(callback: @escaping () -> Void)
 			}
 
-			#if DEBUG
 			internal class MockMyService: MyService {
 				internal init() {
 				}
@@ -424,7 +399,6 @@ class MockableTests: XCTestCase {
 					runCallback = callback
 				}
 			}
-			#endif
 			""",
 			macros: ["Mockable": MockableMacro.self]
 		)
@@ -444,7 +418,6 @@ class MockableTests: XCTestCase {
 				func run(arg1: String, arg2: String)
 			}
 
-			#if DEBUG
 			internal class MockMyService: MyService {
 				internal init() {
 				}
@@ -458,7 +431,6 @@ class MockableTests: XCTestCase {
 					runArg2 = arg2
 				}
 			}
-			#endif
 			""",
 			macros: ["Mockable": MockableMacro.self]
 		)
@@ -478,7 +450,6 @@ class MockableTests: XCTestCase {
 				func run(arg1: String, arg2: Int, arg3: Bool)
 			}
 
-			#if DEBUG
 			internal class MockMyService: MyService {
 				internal init() {
 				}
@@ -494,7 +465,6 @@ class MockableTests: XCTestCase {
 					runArg3 = arg3
 				}
 			}
-			#endif
 			""",
 			macros: ["Mockable": MockableMacro.self]
 		)
@@ -514,7 +484,6 @@ class MockableTests: XCTestCase {
 				func run(arg1: String) -> String
 			}
 
-			#if DEBUG
 			internal class MockMyService: MyService {
 				internal init() {
 				}
@@ -528,7 +497,6 @@ class MockableTests: XCTestCase {
 					return runReturnValue!
 				}
 			}
-			#endif
 			""",
 			macros: ["Mockable": MockableMacro.self]
 		)
@@ -550,7 +518,6 @@ class MockableTests: XCTestCase {
 				func run() -> String?
 			}
 
-			#if DEBUG
 			internal class MockMyService: MyService {
 				internal init() {
 				}
@@ -572,7 +539,6 @@ class MockableTests: XCTestCase {
 					return runReturnValue
 				}
 			}
-			#endif
 			""",
 			macros: ["Mockable": MockableMacro.self]
 		)
@@ -594,7 +560,6 @@ class MockableTests: XCTestCase {
 				func run() -> String?
 			}
 
-			#if DEBUG
 			internal class MockMyService: MyService {
 				internal init() {
 				}
@@ -616,7 +581,6 @@ class MockableTests: XCTestCase {
 					return runReturnValue
 				}
 			}
-			#endif
 			""",
 			macros: ["Mockable": MockableMacro.self]
 		)
@@ -638,7 +602,6 @@ class MockableTests: XCTestCase {
 				func run() -> String?
 			}
 
-			#if DEBUG
 			internal class MockMyService: MyService {
 				internal init() {
 				}
@@ -660,7 +623,6 @@ class MockableTests: XCTestCase {
 					return runReturnValue
 				}
 			}
-			#endif
 			""",
 			macros: ["Mockable": MockableMacro.self]
 		)
@@ -682,7 +644,6 @@ class MockableTests: XCTestCase {
 				func run()
 			}
 
-			#if DEBUG
 			internal class MockMyService: MyService {
 				internal init() {
 				}
@@ -694,7 +655,6 @@ class MockableTests: XCTestCase {
 					runCalled = true
 				}
 			}
-			#endif
 			""",
 			macros: ["Mockable": MockableMacro.self]
 		)
@@ -716,7 +676,6 @@ class MockableTests: XCTestCase {
 				func run()
 			}
 
-			#if DEBUG
 			internal class MockMyService: MyService {
 				internal init() {
 				}
@@ -728,7 +687,6 @@ class MockableTests: XCTestCase {
 					runCalled = true
 				}
 			}
-			#endif
 			""",
 			macros: ["Mockable": MockableMacro.self]
 		)
@@ -750,7 +708,6 @@ class MockableTests: XCTestCase {
 				func run()
 			}
 
-			#if DEBUG
 			internal class MockMyService: MyService {
 				internal init() {
 				}
@@ -762,7 +719,6 @@ class MockableTests: XCTestCase {
 					runCalled = true
 				}
 			}
-			#endif
 			""",
 			macros: ["Mockable": MockableMacro.self]
 		)
@@ -784,7 +740,6 @@ class MockableTests: XCTestCase {
 				func walk() -> String
 			}
 
-			#if DEBUG
 			internal class MockMyService: MyService {
 				internal init() {
 				}
@@ -803,7 +758,6 @@ class MockableTests: XCTestCase {
 					return walkReturnValue!
 				}
 			}
-			#endif
 			""",
 			macros: ["Mockable": MockableMacro.self]
 		)
@@ -824,7 +778,6 @@ class MockableTests: XCTestCase {
 				func run()
 			}
 
-			#if DEBUG
 			internal class MockMyService: MyService {
 				internal init() {
 				}
@@ -834,7 +787,6 @@ class MockableTests: XCTestCase {
 					runCalled = true
 				}
 			}
-			#endif
 			""",
 			macros: ["Mockable": MockableMacro.self]
 		)
@@ -855,7 +807,6 @@ class MockableTests: XCTestCase {
 				@discardableResult func run()
 			}
 
-			#if DEBUG
 			internal class MockMyService: MyService {
 				internal init() {
 				}
@@ -866,7 +817,6 @@ class MockableTests: XCTestCase {
 					runCalled = true
 				}
 			}
-			#endif
 			""",
 			macros: ["Mockable": MockableMacro.self]
 		)
@@ -886,7 +836,6 @@ class MockableTests: XCTestCase {
 				@discardableResult func run()
 			}
 
-			#if DEBUG
 			internal class MockMyService: MyService, @unchecked Sendable {
 				internal init() {
 				}
@@ -897,7 +846,6 @@ class MockableTests: XCTestCase {
 					runCalled = true
 				}
 			}
-			#endif
 			""",
 			macros: ["Mockable": MockableMacro.self]
 		)
@@ -917,7 +865,6 @@ class MockableTests: XCTestCase {
 				func run()
 			}
 
-			#if DEBUG
 			public class MockMyService: MyService {
 				public init() {
 				}
@@ -927,7 +874,6 @@ class MockableTests: XCTestCase {
 					runCalled = true
 				}
 			}
-			#endif
 			""",
 			macros: ["Mockable": MockableMacro.self]
 		)
