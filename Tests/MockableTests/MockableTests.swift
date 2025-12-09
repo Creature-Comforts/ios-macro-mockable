@@ -160,6 +160,38 @@ class MockableTests: XCTestCase {
 		)
 	}
 	
+	func test_Mockable_noArgs_throwsCustomError() {
+		assertMacroExpansion(
+			"""
+			@Mockable
+			protocol MyService {
+				func run() throws(ServiceError)
+			}
+			""",
+			expandedSource:
+			"""
+			protocol MyService {
+				func run() throws(ServiceError)
+			}
+
+			internal class MockMyService: MyService {
+				internal init() {
+				}
+
+				internal var runCalled = false
+				internal var runError: ServiceError?
+				internal func run() throws(ServiceError) {
+					runCalled = true
+					if let error = runError {
+						throw error
+					}
+				}
+			}
+			""",
+			macros: ["Mockable": MockableMacro.self]
+		)
+	}
+	
 	func test_Mockable_noArgs_asyncThrows() {
 		assertMacroExpansion(
 			"""
@@ -773,7 +805,7 @@ class MockableTests: XCTestCase {
 			""",
 			expandedSource:
 			"""
-			@MainActor 
+			@MainActor
 			protocol MyService {
 				func run()
 			}
@@ -802,7 +834,7 @@ class MockableTests: XCTestCase {
 			""",
 			expandedSource:
 			"""
-			@MainActor 
+			@MainActor
 			protocol MyService {
 				@discardableResult func run()
 			}

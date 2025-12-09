@@ -41,9 +41,14 @@ struct FunctionDeclSyntaxComposer {
 		props.append(contentsOf: argProps)
 		
 		// Throws
-		let isThrow = decl.signature.effectSpecifiers?.throwsSpecifier != nil
-		if isThrow {
-			let funcBodyThrow = "\t\(accessLevel) var \(funcName)Error: Error?"
+		if let throwsClause = decl.signature.effectSpecifiers?.throwsClause {
+			let optionalError: String
+			if let errorType = throwsClause.type {
+				optionalError = errorType.description
+			} else {
+				optionalError = "Error"
+			}
+			let funcBodyThrow = "\t\(accessLevel) var \(funcName)Error: \(optionalError)?"
 			props.append(funcBodyThrow)
 		}
 		
@@ -77,8 +82,7 @@ struct FunctionDeclSyntaxComposer {
 		}
 		
 		// Throws
-		let isThrow = decl.signature.effectSpecifiers?.throwsSpecifier != nil
-		if isThrow {
+		if let throwsClause = decl.signature.effectSpecifiers?.throwsClause {
 			let funcBodyThrow = """
 			\tif let error = \(funcName)Error {
 				\tthrow error
@@ -108,7 +112,14 @@ struct FunctionDeclSyntaxComposer {
 		
 		let attrsText = decl.attributes.description.trimmingCharacters(in: .whitespacesAndNewlines)
 		let asyncStr = decl.signature.effectSpecifiers?.asyncSpecifier.map { _ in " async" } ?? ""
-		let throwsStr = decl.signature.effectSpecifiers?.throwsSpecifier.map { _ in " throws" } ?? ""
+		let throwsClause = decl.signature.effectSpecifiers?.throwsClause.map { clause in
+			if let errorType = clause.type {
+				return " throws(\(errorType.description))"
+			} else {
+				return " throws"
+			}
+		}
+		let throwsStr = throwsClause ?? ""
 		let returnClauseStr = decl.signature.returnClause?.description ?? ""
 		let returnStr = returnClauseStr.isEmpty ? "" : "\(returnClauseStr)"
 		
