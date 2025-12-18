@@ -6,10 +6,8 @@
 //
 
 import SwiftSyntax
-
-enum ProtocolDeclSyntaxComposerError: Error {
-	case notEnoughAssociatedTypes
-}
+import SwiftSyntaxMacros
+import SwiftDiagnostics
 
 struct ProtocolDeclSyntaxComposer {
 	
@@ -23,12 +21,15 @@ struct ProtocolDeclSyntaxComposer {
 		decl.memberBlock.members
 	}
 	
-	func compose(_ node: AttributeSyntax) throws -> [DeclSyntax] {
+	func compose(
+		_ node: AttributeSyntax,
+		_ context: some MacroExpansionContext
+	) throws -> [DeclSyntax] {
 		// Extract arguments from the @Mockable macro attribute
 		let accessLevel = extractAccessLevelNodeArgument(node)
 		let associatedTypes = extractAssociatedTypesNodeArgument(node)
 		let typealiases = extractTypealiases(from: decl.memberBlock.members)
-		let mockClass = try composePeer(node, accessLevel, associatedTypes, typealiases)
+		let mockClass = try composePeer(node, context, accessLevel, associatedTypes, typealiases)
 
 		return [
 			DeclSyntax(stringLiteral: mockClass)
@@ -37,6 +38,7 @@ struct ProtocolDeclSyntaxComposer {
 	
 	private func composePeer(
 		_ node: AttributeSyntax,
+		_ context: some MacroExpansionContext,
 		_ accessLevel: MockableMacroAccessLevel,
 		_ associatedTypes: [String]? = nil,
 		_ typealiases: [TypealiasInfo] = []
@@ -63,7 +65,13 @@ struct ProtocolDeclSyntaxComposer {
 		let declAssociatedTypes = extractDeclAssociatedTypes(from: members)
 		if  let associatedTypes {
 			guard associatedTypes.count == declAssociatedTypes.count else {
-				throw ProtocolDeclSyntaxComposerError.notEnoughAssociatedTypes
+				context.diagnose(
+					Diagnostic(
+						node: Syntax(node),
+						message: MockableDiagnostic.notEnoughAssociatedTypes(declAssociatedTypes.count, associatedTypes.count)
+					)
+				)
+				return ""
 			}
 			for (target, replacement) in zip(declAssociatedTypes, associatedTypes) {
 				mockClass = mockClass.replacingOccurrences(of: target.name, with: replacement)
@@ -180,4 +188,23 @@ struct AssociatedTypeInfo {
 struct TypealiasInfo {
 	let name: String
 	let underlyingType: String
+}
+
+enum MockableDiagnostic: DiagnosticMessage {
+	case notEnoughAssociatedTypes(Int, Int)
+	
+	var message: String {
+		switch self {
+		case .notEnoughAssociatedTypes(let expected, let received):
+			return "Not enough associated type replacements declared: expected \(expected), received \(received)."
+		}
+	}
+	
+	var diagnosticID: MessageID {
+		MessageID(domain: "MockableMacro", id: "notEnoughAssociatedTypes")
+	}
+	
+	var severity: DiagnosticSeverity {
+		.error
+	}
 }

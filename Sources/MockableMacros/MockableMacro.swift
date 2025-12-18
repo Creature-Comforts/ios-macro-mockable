@@ -34,6 +34,6 @@ public struct MockableMacro: PeerMacro {
 		}
 		
 		let protocolComposer = ProtocolDeclSyntaxComposer(decl: proto)
-		return try protocolComposer.compose(node)
+		return try protocolComposer.compose(node, context)
 	}
 }

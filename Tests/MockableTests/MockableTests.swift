@@ -1047,6 +1047,36 @@ class MockableTests: XCTestCase {
 		)
 	}
 	
+	func test_Mockable_nodeArgs_associatedType_multiple_notEnoughDeclaredReplacements() {
+		assertMacroExpansion(
+			"""
+			@Mockable(associatedTypes: ["FirstType"])
+			protocol MyService {
+				associatedtype PrimaryType
+				associatedtype SecondaryType
+				func run(arg: PrimaryType) -> SecondaryType
+			}
+			""",
+			expandedSource:
+			"""
+			protocol MyService {
+				associatedtype PrimaryType
+				associatedtype SecondaryType
+				func run(arg: PrimaryType) -> SecondaryType
+			}
+			""",
+			diagnostics: [
+				DiagnosticSpec(
+					message: "Not enough associated type replacements declared: expected 2, received 1.",
+					line: 1,
+					column: 1,
+					severity: .error
+				)
+			],
+			macros: ["Mockable": MockableMacro.self]
+		)
+	}
+	
 	func test_Mockable_typealias_single() {
 		assertMacroExpansion(
 			"""
