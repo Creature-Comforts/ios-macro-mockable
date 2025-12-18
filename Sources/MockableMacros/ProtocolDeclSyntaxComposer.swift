@@ -7,6 +7,10 @@
 
 import SwiftSyntax
 
+enum ProtocolDeclSyntaxComposerError: Error {
+	case notEnoughAssociatedTypes
+}
+
 struct ProtocolDeclSyntaxComposer {
 	
 	let decl: ProtocolDeclSyntax
@@ -15,12 +19,16 @@ struct ProtocolDeclSyntaxComposer {
 		decl.name.text
 	}
 	
-	func compose(_ node: AttributeSyntax) -> [DeclSyntax] {
+	var members: MemberBlockItemListSyntax {
+		decl.memberBlock.members
+	}
+	
+	func compose(_ node: AttributeSyntax) throws -> [DeclSyntax] {
 		// Extract arguments from the @Mockable macro attribute
 		let accessLevel = extractAccessLevelNodeArgument(node)
-		let associatedType = extractAssociatedTypeNodeArgument(node)
+		let associatedTypes = extractAssociatedTypesNodeArgument(node)
 		let typealiases = extractTypealiases(from: decl.memberBlock.members)
-		let mockClass = composePeer(node, accessLevel, associatedType, typealiases)
+		let mockClass = try composePeer(node, accessLevel, associatedTypes, typealiases)
 
 		return [
 			DeclSyntax(stringLiteral: mockClass)
@@ -30,11 +38,11 @@ struct ProtocolDeclSyntaxComposer {
 	private func composePeer(
 		_ node: AttributeSyntax,
 		_ accessLevel: MockableMacroAccessLevel,
-		_ associatedType: String? = nil,
+		_ associatedTypes: [String]? = nil,
 		_ typealiases: [TypealiasInfo] = []
-	) -> String {
+	) throws -> String {
 		let mockClassName = "Mock\(protoConformanceName)"
-		let impl = composeImpl(node, accessLevel, associatedType, typealiases)
+		let impl = composeImpl(node, accessLevel, associatedTypes, typealiases)
 		
 		let sendableConformance: String
 		if !decl.isSendable() {
@@ -52,9 +60,14 @@ struct ProtocolDeclSyntaxComposer {
 		"""
 		
 		// Associated types
-		let declAssociatedType = extractDeclAssociatedTypes(from: decl.memberBlock.members).first?.name
-		if  let associatedType, let declAssociatedType {
-			mockClass = mockClass.replacingOccurrences(of: declAssociatedType, with: associatedType)
+		let declAssociatedTypes = extractDeclAssociatedTypes(from: members)
+		if  let associatedTypes {
+			guard associatedTypes.count == declAssociatedTypes.count else {
+				throw ProtocolDeclSyntaxComposerError.notEnoughAssociatedTypes
+			}
+			for (target, replacement) in zip(declAssociatedTypes, associatedTypes) {
+				mockClass = mockClass.replacingOccurrences(of: target.name, with: replacement)
+			}
 		}
 		
 		return mockClass
@@ -63,21 +76,21 @@ struct ProtocolDeclSyntaxComposer {
 	private func composeImpl(
 		_ node: AttributeSyntax,
 		_ accessLevel: MockableMacroAccessLevel,
-		_ associatedType: String? = nil,
+		_ associatedTypes: [String]? = nil,
 		_ typealiases: [TypealiasInfo] = []
 	) -> String {
 		
 		let propertiesDecls = decl.memberBlock.members
 			.compactMap { $0.decl.as(VariableDeclSyntax.self) }
 			.flatMap {
-				VariableDeclSyntaxComposer(protoConformanceName, $0, accessLevel, associatedType, typealiases)
+				VariableDeclSyntaxComposer(protoConformanceName, $0, accessLevel, typealiases)
 					.compose()
 			}
 		
 		let methodDecls = decl.memberBlock.members
 			.compactMap { $0.decl.as(FunctionDeclSyntax.self) }
 			.map {
-				FunctionDeclSyntaxComposer(protoConformanceName, $0, accessLevel, associatedType, typealiases)
+				FunctionDeclSyntaxComposer(protoConformanceName, $0, accessLevel, typealiases)
 					.compose()
 			}
 		
@@ -108,16 +121,22 @@ struct ProtocolDeclSyntaxComposer {
 		return accessLevel
 	}
 	
-	private func extractAssociatedTypeNodeArgument(_ node: AttributeSyntax) -> String? {
+	private func extractAssociatedTypesNodeArgument(_ node: AttributeSyntax) -> [String]? {
 		guard
 			let arguments = node.arguments,
 			case .argumentList(let list) = arguments,
-			let associatedTypeArg = list.first(where: { $0.label?.text == "associatedType" })
+			let associatedTypeArg = list.first(where: { $0.label?.text == "associatedTypes" }),
+			let listSyntax = associatedTypeArg.expression.as(ArrayExprSyntax.self)
 		else {
 			return nil
 		}
 		
-		return associatedTypeArg.stringLiteralValue
+		return listSyntax.elements.compactMap {
+			if let strSyntax = $0.expression.as(StringLiteralExprSyntax.self) {
+				return strSyntax.segments.first?.description
+			}
+			return nil
+		}
 	}
 	
 	private func extractDeclAssociatedTypes(from members: MemberBlockItemListSyntax) -> [AssociatedTypeInfo] {
@@ -149,19 +168,6 @@ struct ProtocolDeclSyntaxComposer {
 				underlyingType: initialiser.value.trimmedDescription
 			)
 		}
-	}
-}
-
-extension LabeledExprSyntax {
-	var stringLiteralValue: String? {
-		guard
-			let literal = expression.as(StringLiteralExprSyntax.self),
-			literal.segments.count == 1,
-			let segment = literal.segments.first?.as(StringSegmentSyntax.self)
-		else {
-			return nil
-		}
-		return segment.content.text
 	}
 }
 

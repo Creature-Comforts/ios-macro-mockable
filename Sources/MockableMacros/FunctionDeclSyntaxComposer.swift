@@ -12,20 +12,17 @@ struct FunctionDeclSyntaxComposer {
 	let protocolName: String
 	let decl: FunctionDeclSyntax
 	let accessLevel: MockableMacroAccessLevel
-	let associatedType: String?
 	let typealiases: [TypealiasInfo]
 	
 	init(
 		_ protocolName: String,
 		_ decl: FunctionDeclSyntax,
 		_ accessLevel: MockableMacroAccessLevel,
-		_ associatedType: String?,
 		_ typealiases: [TypealiasInfo]
 	) {
 		self.protocolName = protocolName
 		self.decl = decl
 		self.accessLevel = accessLevel
-		self.associatedType = associatedType
 		self.typealiases = typealiases
 	}
 	

@@ -914,7 +914,7 @@ class MockableTests: XCTestCase {
 	func test_Mockable_nodeArgs_associatedType_primaryTypes_single() {
 		assertMacroExpansion(
 			"""
-			@Mockable(associatedType: "CustomType")
+			@Mockable(associatedTypes: ["CustomType"])
 			protocol MyService<PrimaryType> {
 				associatedtype PrimaryType
 				func run() -> PrimaryType
@@ -946,7 +946,7 @@ class MockableTests: XCTestCase {
 	func test_Mockable_nodeArgs_associatedType_single() {
 		assertMacroExpansion(
 			"""
-			@Mockable(associatedType: "CustomType")
+			@Mockable(associatedTypes: ["CustomType"])
 			protocol MyService {
 				associatedtype PrimaryType
 				func run() -> PrimaryType
@@ -978,7 +978,7 @@ class MockableTests: XCTestCase {
 	func test_Mockable_nodeArgs_associatedType_primaryTypes_multiple() {
 		assertMacroExpansion(
 			"""
-			@Mockable(associatedType: ["FirstType", "SecondType"])
+			@Mockable(associatedTypes: ["FirstType", "SecondType"])
 			protocol MyService<PrimaryType, SecondaryType> {
 				associatedtype PrimaryType
 				associatedtype SecondaryType
@@ -998,9 +998,9 @@ class MockableTests: XCTestCase {
 				}
 
 				internal var runCalled = false
-				internal var runArg: PrimaryType?
-				internal var runReturnValue: SecondaryType?
-				internal func run(arg: PrimaryType) -> SecondaryType {
+				internal var runArg: FirstType?
+				internal var runReturnValue: SecondType?
+				internal func run(arg: FirstType) -> SecondType {
 					runCalled = true
 					runArg = arg
 					return runReturnValue!
@@ -1014,7 +1014,7 @@ class MockableTests: XCTestCase {
 	func test_Mockable_nodeArgs_associatedType_multiple() {
 		assertMacroExpansion(
 			"""
-			@Mockable(associatedType: ["FirstType", "SecondType"])
+			@Mockable(associatedTypes: ["FirstType", "SecondType"])
 			protocol MyService {
 				associatedtype PrimaryType
 				associatedtype SecondaryType
@@ -1034,9 +1034,9 @@ class MockableTests: XCTestCase {
 				}
 
 				internal var runCalled = false
-				internal var runArg: PrimaryType?
-				internal var runReturnValue: SecondaryType?
-				internal func run(arg: PrimaryType) -> SecondaryType {
+				internal var runArg: FirstType?
+				internal var runReturnValue: SecondType?
+				internal func run(arg: FirstType) -> SecondType {
 					runCalled = true
 					runArg = arg
 					return runReturnValue!

@@ -12,20 +12,17 @@ struct VariableDeclSyntaxComposer {
 	let protocolName: String
 	let decl: VariableDeclSyntax
 	let accessLevel: MockableMacroAccessLevel
-	let associatedType: String?
 	let typealiases: [TypealiasInfo]
 	
 	init(
 		_ protocolName: String,
 		_ decl: VariableDeclSyntax,
 		_ accessLevel: MockableMacroAccessLevel,
-		_ associatedType: String?,
 		_ typealiases: [TypealiasInfo]
 	) {
 		self.protocolName = protocolName
 		self.decl = decl
 		self.accessLevel = accessLevel
-		self.associatedType = associatedType
 		self.typealiases = typealiases
 	}
 	
