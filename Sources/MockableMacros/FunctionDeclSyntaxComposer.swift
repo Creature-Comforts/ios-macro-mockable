@@ -9,12 +9,24 @@ import SwiftSyntax
 
 struct FunctionDeclSyntaxComposer {
 	
+	let protocolName: String
 	let decl: FunctionDeclSyntax
 	let accessLevel: MockableMacroAccessLevel
+	let associatedType: String?
+	let typealiases: [TypealiasInfo]
 	
-	init(_ decl: FunctionDeclSyntax, _ accessLevel: MockableMacroAccessLevel) {
+	init(
+		_ protocolName: String,
+		_ decl: FunctionDeclSyntax,
+		_ accessLevel: MockableMacroAccessLevel,
+		_ associatedType: String?,
+		_ typealiases: [TypealiasInfo]
+	) {
+		self.protocolName = protocolName
 		self.decl = decl
 		self.accessLevel = accessLevel
+		self.associatedType = associatedType
+		self.typealiases = typealiases
 	}
 	
 	var funcName: String {
@@ -82,7 +94,8 @@ struct FunctionDeclSyntaxComposer {
 		}
 		
 		// Throws
-		if let throwsClause = decl.signature.effectSpecifiers?.throwsClause {
+		let isThrow = decl.signature.effectSpecifiers?.throwsClause != nil
+		if  isThrow {
 			let funcBodyThrow = """
 			\tif let error = \(funcName)Error {
 				\tthrow error
@@ -108,7 +121,17 @@ struct FunctionDeclSyntaxComposer {
 	
 	func buildFunction() -> String {
 		let funcBody = funcBodyPropAssignments.joined(separator: "\n")
-		let params = parameters.map { $0.description }.joined(separator: "")
+		let params = parameters
+			.map {
+				let components = $0.description.components(separatedBy: ": ")
+				var overridenType = components[1]
+				// Typealiases
+				typealiases.forEach {
+					overridenType = overridenType.replacingOccurrences(of: $0.name, with: "\(protocolName).\($0.name)")
+				}
+				return "\(components[0]): \(overridenType)"
+			}
+			.joined(separator: "")
 		
 		let attrsText = decl.attributes.description.trimmingCharacters(in: .whitespacesAndNewlines)
 		let asyncStr = decl.signature.effectSpecifiers?.asyncSpecifier.map { _ in " async" } ?? ""
@@ -121,7 +144,12 @@ struct FunctionDeclSyntaxComposer {
 		}
 		let throwsStr = throwsClause ?? ""
 		let returnClauseStr = decl.signature.returnClause?.description ?? ""
-		let returnStr = returnClauseStr.isEmpty ? "" : "\(returnClauseStr)"
+		var returnStr = returnClauseStr.isEmpty ? "" : "\(returnClauseStr)"
+		
+		// Typealiases
+		typealiases.forEach {
+			returnStr = returnStr.replacingOccurrences(of: $0.name, with: "\(protocolName).\($0.name)")
+		}
 		
 		let funcText = """
 		\(accessLevel) func \(funcName)(\(params))\(asyncStr)\(throwsStr)\(returnStr) {
@@ -149,10 +177,18 @@ struct FunctionDeclSyntaxComposer {
 			.buildFunction()
 	}
 	
+	// MARK: - Private methods
+	
 	private func generateParameterProperties() -> [String] {
 		return parameters.map { param in
 			let argName = name(from: param).capitalized
-			let type = translateFunctionParameterListElementToProperty(param)
+			var type = translateFunctionParameterListElementToProperty(param)
+			
+			// Typealiases
+			typealiases.forEach {
+				type = type.replacingOccurrences(of: $0.name, with: "\(protocolName).\($0.name)")
+			}
+			
 			return "\(accessLevel) var \(funcName)\(argName): \(type)"
 		}
 	}
@@ -197,6 +233,12 @@ struct FunctionDeclSyntaxComposer {
 				type += "?"
 			}
 		}
+		
+		// Typealiases
+		typealiases.forEach {
+			type = type.replacingOccurrences(of: $0.name, with: "\(protocolName).\($0.name)")
+		}
+		
 		let returnProperty = "\(accessLevel) var \(funcName)ReturnValue: \(type)"
 		return returnProperty
 	}

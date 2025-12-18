@@ -9,12 +9,24 @@ import SwiftSyntax
 
 struct VariableDeclSyntaxComposer {
 	
+	let protocolName: String
 	let decl: VariableDeclSyntax
 	let accessLevel: MockableMacroAccessLevel
+	let associatedType: String?
+	let typealiases: [TypealiasInfo]
 	
-	init(_ decl: VariableDeclSyntax, _ accessLevel: MockableMacroAccessLevel) {
+	init(
+		_ protocolName: String,
+		_ decl: VariableDeclSyntax,
+		_ accessLevel: MockableMacroAccessLevel,
+		_ associatedType: String?,
+		_ typealiases: [TypealiasInfo]
+	) {
+		self.protocolName = protocolName
 		self.decl = decl
 		self.accessLevel = accessLevel
+		self.associatedType = associatedType
+		self.typealiases = typealiases
 	}
 	
 	func compose() -> [String] {
@@ -34,7 +46,13 @@ struct VariableDeclSyntaxComposer {
 			}
 			.map { (binding, idPattern, typeAnnotation) -> String in
 				let propertyName = idPattern.identifier.text
-				let propertyType = typeAnnotation.type.description.trimmingCharacters(in: .whitespacesAndNewlines)
+				var propertyType = typeAnnotation.type.description.trimmingCharacters(in: .whitespacesAndNewlines)
+				
+				// Typealiases
+				typealiases.forEach {
+					propertyType = propertyType.replacingOccurrences(of: $0.name, with: "\(protocolName).\($0.name)")
+				}
+				
 				let variableDefinition = "var \(propertyName): \(propertyType)"
 				let updatedVariableDefinition: String
 				if !propertyType.hasSuffix("?") {
