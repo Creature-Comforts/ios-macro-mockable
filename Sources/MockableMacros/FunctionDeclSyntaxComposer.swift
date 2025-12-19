@@ -6,6 +6,7 @@
 //
 
 import SwiftSyntax
+import Foundation
 
 struct FunctionDeclSyntaxComposer {
 	
@@ -81,8 +82,9 @@ struct FunctionDeclSyntaxComposer {
 		// Assign arguments inside function
 		let argsAssignment: String = parameters
 			.map { param in
-				let name = name(from: param)
-				return "\t\(funcName)\(name.capitalized) = \(name)"
+				let variableName = name(from: param)
+				let variableValue = name(from: param, prefersSecondName: true)
+				return "\t\(funcName)\(variableName.capitalisingFirstLetter()) = \(variableValue)"
 			}
 			.joined(separator: "\n")
 		
@@ -178,7 +180,7 @@ struct FunctionDeclSyntaxComposer {
 	
 	private func generateParameterProperties() -> [String] {
 		return parameters.map { param in
-			let argName = name(from: param).capitalized
+			let argName = name(from: param).capitalisingFirstLetter()
 			var type = translateFunctionParameterListElementToProperty(param)
 			
 			// Typealiases
@@ -240,13 +242,23 @@ struct FunctionDeclSyntaxComposer {
 		return returnProperty
 	}
 	
-	private func name(from param: FunctionParameterListSyntax.Element) -> String {
+	private func name(from param: FunctionParameterListSyntax.Element, prefersSecondName: Bool = false) -> String {
 		let firstName = param.firstName.text
-		let secondName = param.secondName?.text
-		if let secondName = secondName {
-			return secondName
-		} else {
+		guard let secondName = param.secondName?.text else {
 			return firstName
 		}
+		if prefersSecondName {
+			return secondName
+		} else {
+			guard firstName != "_" else { return secondName }
+			return firstName + (secondName.capitalisingFirstLetter())
+		}
+	}
+}
+
+private extension String {
+	func capitalisingFirstLetter() -> String {
+		guard let first = first else { return self }
+		return first.uppercased() + dropFirst()
 	}
 }

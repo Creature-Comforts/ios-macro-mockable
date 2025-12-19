@@ -284,6 +284,36 @@ class MockableTests: XCTestCase {
 		)
 	}
 	
+	func test_Mockable_oneArg_ommittedArgumentLabel() {
+		assertMacroExpansion(
+			"""
+			@Mockable
+			protocol MyService {
+				func run(_ arg1: String)
+			}
+			""",
+			expandedSource:
+			"""
+			protocol MyService {
+				func run(_ arg1: String)
+			}
+
+			internal class MockMyService: MyService {
+				internal init() {
+				}
+
+				internal var runCalled = false
+				internal var runArg1: String?
+				internal func run(_ arg1: String) {
+					runCalled = true
+					runArg1 = arg1
+				}
+			}
+			""",
+			macros: ["Mockable": MockableMacro.self]
+		)
+	}
+	
 	func test_Mockable_oneArg_hasArgumentLabel() {
 		assertMacroExpansion(
 			"""
@@ -303,10 +333,10 @@ class MockableTests: XCTestCase {
 				}
 
 				internal var runCalled = false
-				internal var runArg1: String?
+				internal var runArgumentArg1: String?
 				internal func run(argument arg1: String) {
 					runCalled = true
-					runArg1 = arg1
+					runArgumentArg1 = arg1
 				}
 			}
 			""",
@@ -883,7 +913,7 @@ class MockableTests: XCTestCase {
 		)
 	}
 	
-	func test_Mockable_nodeArgs_publicAccessLevel() {
+	func test_Mockable_publicAccessLevel() {
 		assertMacroExpansion(
 			"""
 			@Mockable(accessLevel: .public)
@@ -911,7 +941,7 @@ class MockableTests: XCTestCase {
 		)
 	}
 	
-	func test_Mockable_nodeArgs_associatedType_primaryTypes_single() {
+	func test_Mockable_associatedType_primaryTypes_single() {
 		assertMacroExpansion(
 			"""
 			@Mockable(associatedTypes: ["CustomType"])
@@ -943,7 +973,7 @@ class MockableTests: XCTestCase {
 		)
 	}
 	
-	func test_Mockable_nodeArgs_associatedType_single() {
+	func test_Mockable_associatedType_single() {
 		assertMacroExpansion(
 			"""
 			@Mockable(associatedTypes: ["CustomType"])
@@ -975,7 +1005,7 @@ class MockableTests: XCTestCase {
 		)
 	}
 	
-	func test_Mockable_nodeArgs_associatedType_primaryTypes_multiple() {
+	func test_Mockable_associatedType_primaryTypes_multiple() {
 		assertMacroExpansion(
 			"""
 			@Mockable(associatedTypes: ["FirstType", "SecondType"])
@@ -1011,7 +1041,7 @@ class MockableTests: XCTestCase {
 		)
 	}
 	
-	func test_Mockable_nodeArgs_associatedType_multiple() {
+	func test_Mockable_associatedType_multiple() {
 		assertMacroExpansion(
 			"""
 			@Mockable(associatedTypes: ["FirstType", "SecondType"])
@@ -1047,7 +1077,7 @@ class MockableTests: XCTestCase {
 		)
 	}
 	
-	func test_Mockable_nodeArgs_associatedType_multiple_notEnoughDeclaredReplacements() {
+	func test_Mockable_associatedType_multiple_notEnoughDeclaredReplacements() {
 		assertMacroExpansion(
 			"""
 			@Mockable(associatedTypes: ["FirstType"])
