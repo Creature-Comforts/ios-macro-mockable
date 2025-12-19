@@ -273,10 +273,46 @@ class MockableTests: XCTestCase {
 				}
 
 				internal var runCalled = false
-				internal var runArg1: String?
+				internal var runArg1: String = ""
 				internal func run(arg1: String) {
 					runCalled = true
 					runArg1 = arg1
+				}
+			}
+			""",
+			macros: ["Mockable": MockableMacro.self]
+		)
+	}
+	
+	func test_Mockable_oneArg_dictionaryAndArrayShorthands() {
+		assertMacroExpansion(
+			"""
+			@Mockable
+			protocol MyService {
+				func run(array: [String], dict: [String: String], arrayOfDict: [[String: String]], dictOfArray: [String: [String]])
+			}
+			""",
+			expandedSource:
+			"""
+			protocol MyService {
+				func run(array: [String], dict: [String: String], arrayOfDict: [[String: String]], dictOfArray: [String: [String]])
+			}
+
+			internal class MockMyService: MyService {
+				internal init() {
+				}
+
+				internal var runCalled = false
+				internal var runArray: [String] = []
+				internal var runDict: [String: String] = [:]
+				internal var runArrayOfDict: [[String: String]] = []
+				internal var runDictOfArray: [String: [String]] = [:]
+				internal func run(array: [String], dict: [String: String], arrayOfDict: [[String: String]], dictOfArray: [String: [String]]) {
+					runCalled = true
+					runArray = array
+					runDict = dict
+					runArrayOfDict = arrayOfDict
+					runDictOfArray = dictOfArray
 				}
 			}
 			""",
@@ -303,7 +339,7 @@ class MockableTests: XCTestCase {
 				}
 
 				internal var runCalled = false
-				internal var runArg1: String?
+				internal var runArg1: String = ""
 				internal func run(_ arg1: String) {
 					runCalled = true
 					runArg1 = arg1
@@ -333,7 +369,7 @@ class MockableTests: XCTestCase {
 				}
 
 				internal var runCalled = false
-				internal var runArgumentArg1: String?
+				internal var runArgumentArg1: String = ""
 				internal func run(argument arg1: String) {
 					runCalled = true
 					runArgumentArg1 = arg1
@@ -485,8 +521,8 @@ class MockableTests: XCTestCase {
 				}
 
 				internal var runCalled = false
-				internal var runArg1: String?
-				internal var runArg2: String?
+				internal var runArg1: String = ""
+				internal var runArg2: String = ""
 				internal func run(arg1: String, arg2: String) {
 					runCalled = true
 					runArg1 = arg1
@@ -517,9 +553,9 @@ class MockableTests: XCTestCase {
 				}
 
 				internal var runCalled = false
-				internal var runArg1: String?
-				internal var runArg2: Int?
-				internal var runArg3: Bool?
+				internal var runArg1: String = ""
+				internal var runArg2: Int = 0
+				internal var runArg3: Bool = false
 				internal func run(arg1: String, arg2: Int, arg3: Bool) {
 					runCalled = true
 					runArg1 = arg1
@@ -551,12 +587,12 @@ class MockableTests: XCTestCase {
 				}
 
 				internal var runCalled = false
-				internal var runArg1: String?
-				internal var runReturnValue: String?
+				internal var runArg1: String = ""
+				internal var runReturnValue: String = ""
 				internal func run(arg1: String) -> String {
 					runCalled = true
 					runArg1 = arg1
-					return runReturnValue!
+					return runReturnValue
 				}
 			}
 			""",
@@ -807,17 +843,17 @@ class MockableTests: XCTestCase {
 				}
 
 				internal var runCalled = false
-				internal var runArg1: String?
+				internal var runArg1: String = ""
 				internal func run(arg1: String) {
 					runCalled = true
 					runArg1 = arg1
 				}
 
 				internal var walkCalled = false
-				internal var walkReturnValue: String?
+				internal var walkReturnValue: String = ""
 				internal func walk() -> String {
 					walkCalled = true
-					return walkReturnValue!
+					return walkReturnValue
 				}
 			}
 			""",
@@ -1172,6 +1208,50 @@ class MockableTests: XCTestCase {
 					runArg1 = arg1
 					runArg2 = arg2
 					return runReturnValue!
+				}
+			}
+			""",
+			macros: ["Mockable": MockableMacro.self]
+		)
+	}
+	
+	func test_Mockable_primitivesCollections_assignDefaults() {
+		assertMacroExpansion(
+			"""
+			@Mockable
+			protocol MyService {
+				func run(intArg: Int, stringArg: String, uuidArg: UUID, arrayArg: [Int], setArg: Set<String>, dictArg: [String: Bool], customArg: CustomType) -> String
+			}
+			""",
+			expandedSource:
+			"""
+			protocol MyService {
+				func run(intArg: Int, stringArg: String, uuidArg: UUID, arrayArg: [Int], setArg: Set<String>, dictArg: [String: Bool], customArg: CustomType) -> String
+			}
+
+			internal class MockMyService: MyService {
+				internal init() {
+				}
+			
+				internal var runCalled = false
+				internal var runIntArg: Int = 0
+				internal var runStringArg: String = ""
+				internal var runUuidArg: UUID = UUID()
+				internal var runArrayArg: [Int] = []
+				internal var runSetArg: Set<String> = []
+				internal var runDictArg: [String: Bool] = [:]
+				internal var runCustomArg: CustomType?
+				internal var runReturnValue: String = ""
+				internal func run(intArg: Int, stringArg: String, uuidArg: UUID, arrayArg: [Int], setArg: Set<String>, dictArg: [String: Bool], customArg: CustomType) -> String {
+					runCalled = true
+					runIntArg = intArg
+					runStringArg = stringArg
+					runUuidArg = uuidArg
+					runArrayArg = arrayArg
+					runSetArg = setArg
+					runDictArg = dictArg
+					runCustomArg = customArg
+					return runReturnValue
 				}
 			}
 			""",

@@ -106,7 +106,9 @@ struct FunctionDeclSyntaxComposer {
 		// Returns value
 		if let returnType = returnType, returnType != "Void" {
 			var funcBodyReturn = "\treturn \(funcName)ReturnValue"
-			if let funcReturnType = decl.signature.returnClause?.description, !funcReturnType.hasSuffix("?") {
+			let typeName = returnType.description.trimmingCharacters(in: .whitespacesAndNewlines)
+			let primitiveType = getPrimitiveDefaultValue(typeName)
+			if !typeName.hasSuffix("?") && !isTypePrimitive(primitiveType) {
 				funcBodyReturn += "!"
 			}
 			funcBodyComponents.append(funcBodyReturn)
@@ -122,13 +124,19 @@ struct FunctionDeclSyntaxComposer {
 		let funcBody = funcBodyPropAssignments.joined(separator: "\n")
 		let params = parameters
 			.map {
-				let components = $0.description.components(separatedBy: ": ")
-				var overridenType = components[1]
+				let paramDesc = $0.description.trimmingCharacters(in: .whitespacesAndNewlines)
+				guard let colonIndex = paramDesc.firstIndex(of: ":") else {
+					return paramDesc // fallback, no type found
+				}
+				let paramName = paramDesc[..<colonIndex].trimmingCharacters(in: .whitespacesAndNewlines)
+				var overriddenType = paramDesc[paramDesc.index(after: colonIndex)...].trimmingCharacters(in: .whitespacesAndNewlines)
+				
 				// Typealiases
 				typealiases.forEach {
-					overridenType = overridenType.replacingOccurrences(of: $0.name, with: "\(protocolName).\($0.name)")
+					overriddenType = overriddenType.replacingOccurrences(of: $0.name, with: "\(protocolName).\($0.name)")
 				}
-				return "\(components[0]): \(overridenType)"
+				
+				return "\(paramName): \(overriddenType)"
 			}
 			.joined(separator: "")
 		
@@ -181,6 +189,8 @@ struct FunctionDeclSyntaxComposer {
 	private func generateParameterProperties() -> [String] {
 		return parameters.map { param in
 			let argName = name(from: param).capitalisingFirstLetter()
+			
+			// Translate type (closures handled)
 			var type = translateFunctionParameterListElementToProperty(param)
 			
 			// Typealiases
@@ -188,7 +198,15 @@ struct FunctionDeclSyntaxComposer {
 				type = type.replacingOccurrences(of: $0.name, with: "\(protocolName).\($0.name)")
 			}
 			
-			return "\(accessLevel) var \(funcName)\(argName): \(type)"
+			// Determine default or optional
+			let primitiveType = getPrimitiveDefaultValue(type)
+			switch primitiveType {
+			case .plain(let value), .array(let value), .set(let value), .dictionary(let value):
+				return "\(accessLevel) var \(funcName)\(argName): \(type) = \(value)"
+			case .notPrimitive:
+				type = convertToOptionalIfNeeded(type)
+				return "\(accessLevel) var \(funcName)\(argName): \(type)"
+			}
 		}
 	}
 	
@@ -203,20 +221,14 @@ struct FunctionDeclSyntaxComposer {
 			return translateFunctionTypeSyntaxToProperty(funcBaseType)
 		} else {
 			// Non-closure: ensure it's optional if not already
-			var type = param.type.description.trimmingCharacters(in: .whitespacesAndNewlines)
-			let isOptional = type.hasSuffix("?")
-			if !isOptional {
-				type += "?"
-			}
-			return type
+			return param.type.description.trimmingCharacters(in: .whitespacesAndNewlines)
 		}
 	}
 	
 	private func translateFunctionTypeSyntaxToProperty(_ funcBaseType: FunctionTypeSyntax) -> String {
 		let input = funcBaseType.parameters.description.trimmingCharacters(in: .whitespacesAndNewlines)
 		let output = funcBaseType.returnClause.type.description.trimmingCharacters(in: .whitespacesAndNewlines)
-		let type = "((\(input)) -> \(output))?"
-		return type
+		return "((\(input)) -> \(output))"
 	}
 	
 	private func generateReturnProperty(_ returnType: String) -> String {
@@ -225,12 +237,7 @@ struct FunctionDeclSyntaxComposer {
 			// normalize closure return type too
 			let input = funcType.parameters.description.trimmingCharacters(in: .whitespacesAndNewlines)
 			let output = funcType.returnClause.type.description.trimmingCharacters(in: .whitespacesAndNewlines)
-			type = "((\(input)) -> \(output))?"
-		} else {
-			let isOptional = type.hasSuffix("?")
-			if !isOptional {
-				type += "?"
-			}
+			type = "((\(input)) -> \(output))"
 		}
 		
 		// Typealiases
@@ -238,8 +245,24 @@ struct FunctionDeclSyntaxComposer {
 			type = type.replacingOccurrences(of: $0.name, with: "\(protocolName).\($0.name)")
 		}
 		
-		let returnProperty = "\(accessLevel) var \(funcName)ReturnValue: \(type)"
-		return returnProperty
+		// Determine default or optional
+		let defaultValue = getPrimitiveDefaultValue(type)
+		switch defaultValue {
+		case .plain(let value), .array(let value), .set(let value), .dictionary(let value):
+			return "\(accessLevel) var \(funcName)ReturnValue: \(type) = \(value)"
+		case .notPrimitive:
+			type = convertToOptionalIfNeeded(type)
+			return "\(accessLevel) var \(funcName)ReturnValue: \(type)"
+		}
+	}
+	
+	private func convertToOptionalIfNeeded(_ type: String) -> String {
+		var optionalType = type
+		let isOptional = optionalType.hasSuffix("?")
+		if !isOptional {
+			optionalType += "?"
+		}
+		return optionalType
 	}
 	
 	private func name(from param: FunctionParameterListSyntax.Element, prefersSecondName: Bool = false) -> String {
@@ -253,6 +276,94 @@ struct FunctionDeclSyntaxComposer {
 			guard firstName != "_" else { return secondName }
 			return firstName + (secondName.capitalisingFirstLetter())
 		}
+	}
+	
+	private func defaultValue(for type: String) -> ExprSyntax {
+		switch type {
+		case "Int", "Double", "Decimal", "Float":
+			return ExprSyntax("0")
+		case "CGFloat": return ExprSyntax("0")
+		case "CGSize": return ExprSyntax("CGSize.zero")
+		case "CGPoint": return ExprSyntax("CGPoint.zero")
+		case "CGRect": return ExprSyntax("CGRect.zero")
+		case "Bool": return ExprSyntax("false")
+		case "URL": return ExprSyntax("URL(string: \"https://creaturecomforts.co.uk\")")
+		case "Data": return ExprSyntax("Data()")
+		case "Date": return ExprSyntax("Date()")
+		case "String": return ExprSyntax("\"\"")
+		case "UUID": return ExprSyntax("UUID()")
+		default: return ExprSyntax("")
+		}
+	}
+	
+	enum PrimitiveTypeDefaultValue {
+		case plain(ExprSyntax)
+		case array(ExprSyntax)
+		case set(ExprSyntax)
+		case dictionary(ExprSyntax)
+		case notPrimitive
+	}
+	
+	private func getPrimitiveDefaultValue(_ type: String) -> PrimitiveTypeDefaultValue {
+		let fixedPrimitives: Set<String> = [
+			"Int", "Double", "Float", "Decimal", "CGFloat",
+			"CGSize", "CGRect", "CGPoint", "Bool", "URL",
+			"Data", "Date", "String", "UUID"
+		]
+		
+		if fixedPrimitives.contains(type) {
+			return .plain(defaultValue(for: type))
+		}
+		
+		let trimmed = type.trimmingCharacters(in: .whitespacesAndNewlines)
+		let range = NSRange(trimmed.startIndex..<trimmed.endIndex, in: trimmed)
+		
+		let bracketRegex = try! NSRegularExpression(pattern: #"^\[.*\]$"#)
+		let genericRegex = try! NSRegularExpression(pattern: #"^(Array|Set)<.+>$"#)
+		let dictGenericRegex = try! NSRegularExpression(pattern: #"^Dictionary<.+,.+>$"#)
+		
+		if bracketRegex.firstMatch(in: trimmed, range: range) != nil {
+			let inner = String(trimmed.dropFirst().dropLast()).trimmingCharacters(in: .whitespacesAndNewlines)
+			if isTopLevelDictionary(inner) {
+				return .dictionary(ExprSyntax("[:]")) // dictionary
+			} else {
+				return .array(ExprSyntax("[]"))      // array
+			}
+		}
+		
+		if genericRegex.firstMatch(in: trimmed, range: range) != nil {
+			if trimmed.hasPrefix("Set<") {
+				return .set(ExprSyntax("[]"))
+			} else {
+				return .array(ExprSyntax("[]"))
+			}
+		}
+		
+		if dictGenericRegex.firstMatch(in: trimmed, range: range) != nil {
+			return .dictionary(ExprSyntax("[:]"))
+		}
+		
+		return .notPrimitive
+	}
+	
+	private func isTypePrimitive(_ type: PrimitiveTypeDefaultValue) -> Bool {
+		switch type {
+		case .notPrimitive: return false
+		default: return true
+		}
+	}
+	
+	// Helper function
+	private func isTopLevelDictionary(_ s: String) -> Bool {
+		var level = 0
+		for char in s {
+			if char == "[" { level += 1 }
+			if char == "]" { level -= 1 }
+			if char == ":" && level == 0 {
+				return true
+			}
+		}
+		return false
 	}
 }
 
