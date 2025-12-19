@@ -910,5 +910,243 @@ class MockableTests: XCTestCase {
 			macros: ["Mockable": MockableMacro.self]
 		)
 	}
+	
+	func test_Mockable_nodeArgs_associatedType_primaryTypes_single() {
+		assertMacroExpansion(
+			"""
+			@Mockable(associatedTypes: ["CustomType"])
+			protocol MyService<PrimaryType> {
+				associatedtype PrimaryType
+				func run() -> PrimaryType
+			}
+			""",
+			expandedSource:
+			"""
+			protocol MyService<PrimaryType> {
+				associatedtype PrimaryType
+				func run() -> PrimaryType
+			}
+
+			internal class MockMyService: MyService {
+				internal init() {
+				}
+
+				internal var runCalled = false
+				internal var runReturnValue: CustomType?
+				internal func run() -> CustomType {
+					runCalled = true
+					return runReturnValue!
+				}
+			}
+			""",
+			macros: ["Mockable": MockableMacro.self]
+		)
+	}
+	
+	func test_Mockable_nodeArgs_associatedType_single() {
+		assertMacroExpansion(
+			"""
+			@Mockable(associatedTypes: ["CustomType"])
+			protocol MyService {
+				associatedtype PrimaryType
+				func run() -> PrimaryType
+			}
+			""",
+			expandedSource:
+			"""
+			protocol MyService {
+				associatedtype PrimaryType
+				func run() -> PrimaryType
+			}
+
+			internal class MockMyService: MyService {
+				internal init() {
+				}
+
+				internal var runCalled = false
+				internal var runReturnValue: CustomType?
+				internal func run() -> CustomType {
+					runCalled = true
+					return runReturnValue!
+				}
+			}
+			""",
+			macros: ["Mockable": MockableMacro.self]
+		)
+	}
+	
+	func test_Mockable_nodeArgs_associatedType_primaryTypes_multiple() {
+		assertMacroExpansion(
+			"""
+			@Mockable(associatedTypes: ["FirstType", "SecondType"])
+			protocol MyService<PrimaryType, SecondaryType> {
+				associatedtype PrimaryType
+				associatedtype SecondaryType
+				func run(arg: PrimaryType) -> SecondaryType
+			}
+			""",
+			expandedSource:
+			"""
+			protocol MyService<PrimaryType, SecondaryType> {
+				associatedtype PrimaryType
+				associatedtype SecondaryType
+				func run(arg: PrimaryType) -> SecondaryType
+			}
+
+			internal class MockMyService: MyService {
+				internal init() {
+				}
+
+				internal var runCalled = false
+				internal var runArg: FirstType?
+				internal var runReturnValue: SecondType?
+				internal func run(arg: FirstType) -> SecondType {
+					runCalled = true
+					runArg = arg
+					return runReturnValue!
+				}
+			}
+			""",
+			macros: ["Mockable": MockableMacro.self]
+		)
+	}
+	
+	func test_Mockable_nodeArgs_associatedType_multiple() {
+		assertMacroExpansion(
+			"""
+			@Mockable(associatedTypes: ["FirstType", "SecondType"])
+			protocol MyService {
+				associatedtype PrimaryType
+				associatedtype SecondaryType
+				func run(arg: PrimaryType) -> SecondaryType
+			}
+			""",
+			expandedSource:
+			"""
+			protocol MyService {
+				associatedtype PrimaryType
+				associatedtype SecondaryType
+				func run(arg: PrimaryType) -> SecondaryType
+			}
+
+			internal class MockMyService: MyService {
+				internal init() {
+				}
+
+				internal var runCalled = false
+				internal var runArg: FirstType?
+				internal var runReturnValue: SecondType?
+				internal func run(arg: FirstType) -> SecondType {
+					runCalled = true
+					runArg = arg
+					return runReturnValue!
+				}
+			}
+			""",
+			macros: ["Mockable": MockableMacro.self]
+		)
+	}
+	
+	func test_Mockable_nodeArgs_associatedType_multiple_notEnoughDeclaredReplacements() {
+		assertMacroExpansion(
+			"""
+			@Mockable(associatedTypes: ["FirstType"])
+			protocol MyService {
+				associatedtype PrimaryType
+				associatedtype SecondaryType
+				func run(arg: PrimaryType) -> SecondaryType
+			}
+			""",
+			expandedSource:
+			"""
+			protocol MyService {
+				associatedtype PrimaryType
+				associatedtype SecondaryType
+				func run(arg: PrimaryType) -> SecondaryType
+			}
+			""",
+			diagnostics: [
+				DiagnosticSpec(
+					message: "Not enough associated type replacements declared: expected 2, received 1.",
+					line: 1,
+					column: 1,
+					severity: .error
+				)
+			],
+			macros: ["Mockable": MockableMacro.self]
+		)
+	}
+	
+	func test_Mockable_typealias_single() {
+		assertMacroExpansion(
+			"""
+			@Mockable
+			protocol MyService {
+				typealias T = String
+				func run() -> T
+			}
+			""",
+			expandedSource:
+			"""
+			protocol MyService {
+				typealias T = String
+				func run() -> T
+			}
+
+			internal class MockMyService: MyService {
+				internal init() {
+				}
+
+				internal var runCalled = false
+				internal var runReturnValue: MyService.T?
+				internal func run() -> MyService.T {
+					runCalled = true
+					return runReturnValue!
+				}
+			}
+			""",
+			macros: ["Mockable": MockableMacro.self]
+		)
+	}
+	
+	func test_Mockable_typealias_multiple() {
+		assertMacroExpansion(
+			"""
+			@Mockable
+			protocol MyService {
+				typealias K = Int
+				typealias V = Double
+				typealias T = String
+				func run(arg1: K, arg2: V) -> T
+			}
+			""",
+			expandedSource:
+			"""
+			protocol MyService {
+				typealias K = Int
+				typealias V = Double
+				typealias T = String
+				func run(arg1: K, arg2: V) -> T
+			}
+
+			internal class MockMyService: MyService {
+				internal init() {
+				}
+
+				internal var runCalled = false
+				internal var runArg1: MyService.K?
+				internal var runArg2: MyService.V?
+				internal var runReturnValue: MyService.T?
+				internal func run(arg1: MyService.K, arg2: MyService.V) -> MyService.T {
+					runCalled = true
+					runArg1 = arg1
+					runArg2 = arg2
+					return runReturnValue!
+				}
+			}
+			""",
+			macros: ["Mockable": MockableMacro.self]
+		)
+	}
 }
 #endif

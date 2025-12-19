@@ -8,4 +8,7 @@ public enum MockableAccessLevel {
 }
 
 @attached(peer, names: prefixed(Mock))
-public macro Mockable(accessLevel: MockableAccessLevel = .public) = #externalMacro(module: "MockableMacros", type: "MockableMacro")
+public macro Mockable(
+	accessLevel: MockableAccessLevel = .public,
+	associatedTypes: [String] = []
+) = #externalMacro(module: "MockableMacros", type: "MockableMacro")
