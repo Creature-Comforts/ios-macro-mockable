@@ -54,8 +54,8 @@ struct VariableDeclSyntaxComposer {
 				let updatedVariableDefinition: String
 				if !propertyType.hasSuffix("?") {
 					updatedVariableDefinition = """
-					\(accessLevel) var _\(propertyName): \(propertyType)!
-					\(accessLevel) \(variableDefinition) {
+					\(accessLevel.syntax)var _\(propertyName): \(propertyType)!
+					\(accessLevel.syntax)\(variableDefinition) {
 						get {
 							_\(propertyName)
 						}

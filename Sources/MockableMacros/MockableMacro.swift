@@ -13,6 +13,14 @@ public enum MockableMacroAccessLevel: String {
 	case `public`
 	case `internal`
 	case `private`
+	
+	var syntax: String {
+		switch self {
+		case .internal: ""
+		case .public: "public "
+		case .private: "private "
+		}
+	}
 }
 
 enum MacroError: Error {

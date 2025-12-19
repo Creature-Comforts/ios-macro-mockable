@@ -24,12 +24,12 @@ class MockableTests: XCTestCase {
 				func run()
 			}
 			
-			internal class MockMyService: MyService {
-				internal init() {
+			class MockMyService: MyService {
+				init() {
 				}
 
-				internal var runCalled = false
-				internal func run() {
+				var runCalled = false
+				func run() {
 					runCalled = true
 				}
 			}
@@ -52,12 +52,12 @@ class MockableTests: XCTestCase {
 				func run() async
 			}
 
-			internal class MockMyService: MyService {
-				internal init() {
+			class MockMyService: MyService {
+				init() {
 				}
 
-				internal var runCalled = false
-				internal func run() async {
+				var runCalled = false
+				func run() async {
 					runCalled = true
 				}
 			}
@@ -82,13 +82,13 @@ class MockableTests: XCTestCase {
 				func run() async
 			}
 
-			internal class MockMyService: MyService {
-				internal init() {
+			class MockMyService: MyService {
+				init() {
 				}
 
-				internal var runCalled = false
+				var runCalled = false
 				@MainActor
-				internal func run() async {
+				func run() async {
 					runCalled = true
 				}
 			}
@@ -113,13 +113,13 @@ class MockableTests: XCTestCase {
 				func run() async
 			}
 			
-			internal class MockMyService: MyService {
-				internal init() {
+			class MockMyService: MyService {
+				init() {
 				}
 
-				internal var runCalled = false
+				var runCalled = false
 				@MainActor @available(iOS 15, *)
-				internal func run() async {
+				func run() async {
 					runCalled = true
 				}
 			}
@@ -142,13 +142,13 @@ class MockableTests: XCTestCase {
 				func run() throws
 			}
 			
-			internal class MockMyService: MyService {
-				internal init() {
+			class MockMyService: MyService {
+				init() {
 				}
 
-				internal var runCalled = false
-				internal var runError: Error?
-				internal func run() throws {
+				var runCalled = false
+				var runError: Error?
+				func run() throws {
 					runCalled = true
 					if let error = runError {
 						throw error
@@ -174,13 +174,13 @@ class MockableTests: XCTestCase {
 				func run() throws(ServiceError)
 			}
 
-			internal class MockMyService: MyService {
-				internal init() {
+			class MockMyService: MyService {
+				init() {
 				}
 
-				internal var runCalled = false
-				internal var runError: ServiceError?
-				internal func run() throws(ServiceError) {
+				var runCalled = false
+				var runError: ServiceError?
+				func run() throws(ServiceError) {
 					runCalled = true
 					if let error = runError {
 						throw error
@@ -206,13 +206,13 @@ class MockableTests: XCTestCase {
 				func run() async throws
 			}
 
-			internal class MockMyService: MyService {
-				internal init() {
+			class MockMyService: MyService {
+				init() {
 				}
 
-				internal var runCalled = false
-				internal var runError: Error?
-				internal func run() async throws {
+				var runCalled = false
+				var runError: Error?
+				func run() async throws {
 					runCalled = true
 					if let error = runError {
 						throw error
@@ -238,13 +238,13 @@ class MockableTests: XCTestCase {
 				func run() -> String?
 			}
 
-			internal class MockMyService: MyService {
-				internal init() {
+			class MockMyService: MyService {
+				init() {
 				}
 
-				internal var runCalled = false
-				internal var runReturnValue: String?
-				internal func run() -> String? {
+				var runCalled = false
+				var runReturnValue: String?
+				func run() -> String? {
 					runCalled = true
 					return runReturnValue
 				}
@@ -268,13 +268,13 @@ class MockableTests: XCTestCase {
 				func run(arg1: String)
 			}
 
-			internal class MockMyService: MyService {
-				internal init() {
+			class MockMyService: MyService {
+				init() {
 				}
 
-				internal var runCalled = false
-				internal var runArg1: String = ""
-				internal func run(arg1: String) {
+				var runCalled = false
+				var runArg1: String = ""
+				func run(arg1: String) {
 					runCalled = true
 					runArg1 = arg1
 				}
@@ -298,16 +298,16 @@ class MockableTests: XCTestCase {
 				func run(array: [String], dict: [String: String], arrayOfDict: [[String: String]], dictOfArray: [String: [String]])
 			}
 
-			internal class MockMyService: MyService {
-				internal init() {
+			class MockMyService: MyService {
+				init() {
 				}
 
-				internal var runCalled = false
-				internal var runArray: [String] = []
-				internal var runDict: [String: String] = [:]
-				internal var runArrayOfDict: [[String: String]] = []
-				internal var runDictOfArray: [String: [String]] = [:]
-				internal func run(array: [String], dict: [String: String], arrayOfDict: [[String: String]], dictOfArray: [String: [String]]) {
+				var runCalled = false
+				var runArray: [String] = []
+				var runDict: [String: String] = [:]
+				var runArrayOfDict: [[String: String]] = []
+				var runDictOfArray: [String: [String]] = [:]
+				func run(array: [String], dict: [String: String], arrayOfDict: [[String: String]], dictOfArray: [String: [String]]) {
 					runCalled = true
 					runArray = array
 					runDict = dict
@@ -334,13 +334,13 @@ class MockableTests: XCTestCase {
 				func run(_ arg1: String)
 			}
 
-			internal class MockMyService: MyService {
-				internal init() {
+			class MockMyService: MyService {
+				init() {
 				}
 
-				internal var runCalled = false
-				internal var runArg1: String = ""
-				internal func run(_ arg1: String) {
+				var runCalled = false
+				var runArg1: String = ""
+				func run(_ arg1: String) {
 					runCalled = true
 					runArg1 = arg1
 				}
@@ -364,13 +364,13 @@ class MockableTests: XCTestCase {
 				func run(argument arg1: String)
 			}
 
-			internal class MockMyService: MyService {
-				internal init() {
+			class MockMyService: MyService {
+				init() {
 				}
 
-				internal var runCalled = false
-				internal var runArgumentArg1: String = ""
-				internal func run(argument arg1: String) {
+				var runCalled = false
+				var runArgumentArg1: String = ""
+				func run(argument arg1: String) {
 					runCalled = true
 					runArgumentArg1 = arg1
 				}
@@ -394,13 +394,13 @@ class MockableTests: XCTestCase {
 				func run(callback: () -> Void)
 			}
 
-			internal class MockMyService: MyService {
-				internal init() {
+			class MockMyService: MyService {
+				init() {
 				}
 
-				internal var runCalled = false
-				internal var runCallback: (() -> Void)?
-				internal func run(callback: () -> Void) {
+				var runCalled = false
+				var runCallback: (() -> Void)?
+				func run(callback: () -> Void) {
 					runCalled = true
 					runCallback = callback
 				}
@@ -424,14 +424,14 @@ class MockableTests: XCTestCase {
 				func run(before: @escaping (Int) -> String, callback: () -> Void)
 			}
 
-			internal class MockMyService: MyService {
-				internal init() {
+			class MockMyService: MyService {
+				init() {
 				}
 
-				internal var runCalled = false
-				internal var runBefore: ((Int) -> String)?
-				internal var runCallback: (() -> Void)?
-				internal func run(before: @escaping (Int) -> String, callback: () -> Void) {
+				var runCalled = false
+				var runBefore: ((Int) -> String)?
+				var runCallback: (() -> Void)?
+				func run(before: @escaping (Int) -> String, callback: () -> Void) {
 					runCalled = true
 					runBefore = before
 					runCallback = callback
@@ -456,13 +456,13 @@ class MockableTests: XCTestCase {
 				func run(callback: (() -> Void)?)
 			}
 
-			internal class MockMyService: MyService {
-				internal init() {
+			class MockMyService: MyService {
+				init() {
 				}
 
-				internal var runCalled = false
-				internal var runCallback: (() -> Void)?
-				internal func run(callback: (() -> Void)?) {
+				var runCalled = false
+				var runCallback: (() -> Void)?
+				func run(callback: (() -> Void)?) {
 					runCalled = true
 					runCallback = callback
 				}
@@ -486,13 +486,13 @@ class MockableTests: XCTestCase {
 				func run(callback: @escaping () -> Void)
 			}
 
-			internal class MockMyService: MyService {
-				internal init() {
+			class MockMyService: MyService {
+				init() {
 				}
 
-				internal var runCalled = false
-				internal var runCallback: (() -> Void)?
-				internal func run(callback: @escaping () -> Void) {
+				var runCalled = false
+				var runCallback: (() -> Void)?
+				func run(callback: @escaping () -> Void) {
 					runCalled = true
 					runCallback = callback
 				}
@@ -516,14 +516,14 @@ class MockableTests: XCTestCase {
 				func run(arg1: String, arg2: String)
 			}
 
-			internal class MockMyService: MyService {
-				internal init() {
+			class MockMyService: MyService {
+				init() {
 				}
 
-				internal var runCalled = false
-				internal var runArg1: String = ""
-				internal var runArg2: String = ""
-				internal func run(arg1: String, arg2: String) {
+				var runCalled = false
+				var runArg1: String = ""
+				var runArg2: String = ""
+				func run(arg1: String, arg2: String) {
 					runCalled = true
 					runArg1 = arg1
 					runArg2 = arg2
@@ -548,15 +548,15 @@ class MockableTests: XCTestCase {
 				func run(arg1: String, arg2: Int, arg3: Bool)
 			}
 
-			internal class MockMyService: MyService {
-				internal init() {
+			class MockMyService: MyService {
+				init() {
 				}
 
-				internal var runCalled = false
-				internal var runArg1: String = ""
-				internal var runArg2: Int = 0
-				internal var runArg3: Bool = false
-				internal func run(arg1: String, arg2: Int, arg3: Bool) {
+				var runCalled = false
+				var runArg1: String = ""
+				var runArg2: Int = 0
+				var runArg3: Bool = false
+				func run(arg1: String, arg2: Int, arg3: Bool) {
 					runCalled = true
 					runArg1 = arg1
 					runArg2 = arg2
@@ -582,14 +582,14 @@ class MockableTests: XCTestCase {
 				func run(arg1: String) -> String
 			}
 
-			internal class MockMyService: MyService {
-				internal init() {
+			class MockMyService: MyService {
+				init() {
 				}
 
-				internal var runCalled = false
-				internal var runArg1: String = ""
-				internal var runReturnValue: String = ""
-				internal func run(arg1: String) -> String {
+				var runCalled = false
+				var runArg1: String = ""
+				var runReturnValue: String = ""
+				func run(arg1: String) -> String {
 					runCalled = true
 					runArg1 = arg1
 					return runReturnValue
@@ -616,12 +616,12 @@ class MockableTests: XCTestCase {
 				func run() -> String?
 			}
 
-			internal class MockMyService: MyService {
-				internal init() {
+			class MockMyService: MyService {
+				init() {
 				}
 
-				internal var _prop: Int!
-				internal var prop: Int {
+				var _prop: Int!
+				var prop: Int {
 					get {
 						_prop
 					}
@@ -630,9 +630,9 @@ class MockableTests: XCTestCase {
 					}
 				}
 
-				internal var runCalled = false
-				internal var runReturnValue: String?
-				internal func run() -> String? {
+				var runCalled = false
+				var runReturnValue: String?
+				func run() -> String? {
 					runCalled = true
 					return runReturnValue
 				}
@@ -658,12 +658,12 @@ class MockableTests: XCTestCase {
 				func run() -> String?
 			}
 
-			internal class MockMyService: MyService {
-				internal init() {
+			class MockMyService: MyService {
+				init() {
 				}
 
-				internal var _prop: Int!
-				internal var prop: Int {
+				var _prop: Int!
+				var prop: Int {
 					get {
 						_prop
 					}
@@ -672,9 +672,9 @@ class MockableTests: XCTestCase {
 					}
 				}
 
-				internal var runCalled = false
-				internal var runReturnValue: String?
-				internal func run() -> String? {
+				var runCalled = false
+				var runReturnValue: String?
+				func run() -> String? {
 					runCalled = true
 					return runReturnValue
 				}
@@ -700,12 +700,12 @@ class MockableTests: XCTestCase {
 				func run() -> String?
 			}
 
-			internal class MockMyService: MyService {
-				internal init() {
+			class MockMyService: MyService {
+				init() {
 				}
 
-				internal var _prop: Int!
-				internal var prop: Int {
+				var _prop: Int!
+				var prop: Int {
 					get {
 						_prop
 					}
@@ -714,9 +714,9 @@ class MockableTests: XCTestCase {
 					}
 				}
 
-				internal var runCalled = false
-				internal var runReturnValue: String?
-				internal func run() -> String? {
+				var runCalled = false
+				var runReturnValue: String?
+				func run() -> String? {
 					runCalled = true
 					return runReturnValue
 				}
@@ -742,14 +742,14 @@ class MockableTests: XCTestCase {
 				func run()
 			}
 
-			internal class MockMyService: MyService {
-				internal init() {
+			class MockMyService: MyService {
+				init() {
 				}
 
 				var prop: Int?
 
-				internal var runCalled = false
-				internal func run() {
+				var runCalled = false
+				func run() {
 					runCalled = true
 				}
 			}
@@ -774,14 +774,14 @@ class MockableTests: XCTestCase {
 				func run()
 			}
 
-			internal class MockMyService: MyService {
-				internal init() {
+			class MockMyService: MyService {
+				init() {
 				}
 
 				var prop: Int?
 
-				internal var runCalled = false
-				internal func run() {
+				var runCalled = false
+				func run() {
 					runCalled = true
 				}
 			}
@@ -806,14 +806,14 @@ class MockableTests: XCTestCase {
 				func run()
 			}
 
-			internal class MockMyService: MyService {
-				internal init() {
+			class MockMyService: MyService {
+				init() {
 				}
 
 				var prop: Int?
 
-				internal var runCalled = false
-				internal func run() {
+				var runCalled = false
+				func run() {
 					runCalled = true
 				}
 			}
@@ -838,20 +838,20 @@ class MockableTests: XCTestCase {
 				func walk() -> String
 			}
 
-			internal class MockMyService: MyService {
-				internal init() {
+			class MockMyService: MyService {
+				init() {
 				}
 
-				internal var runCalled = false
-				internal var runArg1: String = ""
-				internal func run(arg1: String) {
+				var runCalled = false
+				var runArg1: String = ""
+				func run(arg1: String) {
 					runCalled = true
 					runArg1 = arg1
 				}
 
-				internal var walkCalled = false
-				internal var walkReturnValue: String = ""
-				internal func walk() -> String {
+				var walkCalled = false
+				var walkReturnValue: String = ""
+				func walk() -> String {
 					walkCalled = true
 					return walkReturnValue
 				}
@@ -876,12 +876,12 @@ class MockableTests: XCTestCase {
 				func run()
 			}
 
-			internal class MockMyService: MyService {
-				internal init() {
+			class MockMyService: MyService {
+				init() {
 				}
 
-				internal var runCalled = false
-				internal func run() {
+				var runCalled = false
+				func run() {
 					runCalled = true
 				}
 			}
@@ -905,13 +905,13 @@ class MockableTests: XCTestCase {
 				@discardableResult func run()
 			}
 
-			internal class MockMyService: MyService {
-				internal init() {
+			class MockMyService: MyService {
+				init() {
 				}
 
-				internal var runCalled = false
+				var runCalled = false
 				@discardableResult
-				internal func run() {
+				func run() {
 					runCalled = true
 				}
 			}
@@ -934,13 +934,13 @@ class MockableTests: XCTestCase {
 				@discardableResult func run()
 			}
 
-			internal class MockMyService: MyService, @unchecked Sendable {
-				internal init() {
+			class MockMyService: MyService, @unchecked Sendable {
+				init() {
 				}
 
-				internal var runCalled = false
+				var runCalled = false
 				@discardableResult
-				internal func run() {
+				func run() {
 					runCalled = true
 				}
 			}
@@ -993,13 +993,13 @@ class MockableTests: XCTestCase {
 				func run() -> PrimaryType
 			}
 
-			internal class MockMyService: MyService {
-				internal init() {
+			class MockMyService: MyService {
+				init() {
 				}
 
-				internal var runCalled = false
-				internal var runReturnValue: CustomType?
-				internal func run() -> CustomType {
+				var runCalled = false
+				var runReturnValue: CustomType?
+				func run() -> CustomType {
 					runCalled = true
 					return runReturnValue!
 				}
@@ -1025,13 +1025,13 @@ class MockableTests: XCTestCase {
 				func run() -> PrimaryType
 			}
 
-			internal class MockMyService: MyService {
-				internal init() {
+			class MockMyService: MyService {
+				init() {
 				}
 
-				internal var runCalled = false
-				internal var runReturnValue: CustomType?
-				internal func run() -> CustomType {
+				var runCalled = false
+				var runReturnValue: CustomType?
+				func run() -> CustomType {
 					runCalled = true
 					return runReturnValue!
 				}
@@ -1059,14 +1059,14 @@ class MockableTests: XCTestCase {
 				func run(arg: PrimaryType) -> SecondaryType
 			}
 
-			internal class MockMyService: MyService {
-				internal init() {
+			class MockMyService: MyService {
+				init() {
 				}
 
-				internal var runCalled = false
-				internal var runArg: FirstType?
-				internal var runReturnValue: SecondType?
-				internal func run(arg: FirstType) -> SecondType {
+				var runCalled = false
+				var runArg: FirstType?
+				var runReturnValue: SecondType?
+				func run(arg: FirstType) -> SecondType {
 					runCalled = true
 					runArg = arg
 					return runReturnValue!
@@ -1095,14 +1095,14 @@ class MockableTests: XCTestCase {
 				func run(arg: PrimaryType) -> SecondaryType
 			}
 
-			internal class MockMyService: MyService {
-				internal init() {
+			class MockMyService: MyService {
+				init() {
 				}
 
-				internal var runCalled = false
-				internal var runArg: FirstType?
-				internal var runReturnValue: SecondType?
-				internal func run(arg: FirstType) -> SecondType {
+				var runCalled = false
+				var runArg: FirstType?
+				var runReturnValue: SecondType?
+				func run(arg: FirstType) -> SecondType {
 					runCalled = true
 					runArg = arg
 					return runReturnValue!
@@ -1159,13 +1159,13 @@ class MockableTests: XCTestCase {
 				func run() -> T
 			}
 
-			internal class MockMyService: MyService {
-				internal init() {
+			class MockMyService: MyService {
+				init() {
 				}
 
-				internal var runCalled = false
-				internal var runReturnValue: MyService.T?
-				internal func run() -> MyService.T {
+				var runCalled = false
+				var runReturnValue: MyService.T?
+				func run() -> MyService.T {
 					runCalled = true
 					return runReturnValue!
 				}
@@ -1195,15 +1195,15 @@ class MockableTests: XCTestCase {
 				func run(arg1: K, arg2: V) -> T
 			}
 
-			internal class MockMyService: MyService {
-				internal init() {
+			class MockMyService: MyService {
+				init() {
 				}
 
-				internal var runCalled = false
-				internal var runArg1: MyService.K?
-				internal var runArg2: MyService.V?
-				internal var runReturnValue: MyService.T?
-				internal func run(arg1: MyService.K, arg2: MyService.V) -> MyService.T {
+				var runCalled = false
+				var runArg1: MyService.K?
+				var runArg2: MyService.V?
+				var runReturnValue: MyService.T?
+				func run(arg1: MyService.K, arg2: MyService.V) -> MyService.T {
 					runCalled = true
 					runArg1 = arg1
 					runArg2 = arg2
@@ -1229,20 +1229,20 @@ class MockableTests: XCTestCase {
 				func run(intArg: Int, stringArg: String, uuidArg: UUID, arrayArg: [Int], setArg: Set<String>, dictArg: [String: Bool], customArg: CustomType) -> String
 			}
 
-			internal class MockMyService: MyService {
-				internal init() {
+			class MockMyService: MyService {
+				init() {
 				}
 			
-				internal var runCalled = false
-				internal var runIntArg: Int = 0
-				internal var runStringArg: String = ""
-				internal var runUuidArg: UUID = UUID()
-				internal var runArrayArg: [Int] = []
-				internal var runSetArg: Set<String> = []
-				internal var runDictArg: [String: Bool] = [:]
-				internal var runCustomArg: CustomType?
-				internal var runReturnValue: String = ""
-				internal func run(intArg: Int, stringArg: String, uuidArg: UUID, arrayArg: [Int], setArg: Set<String>, dictArg: [String: Bool], customArg: CustomType) -> String {
+				var runCalled = false
+				var runIntArg: Int = 0
+				var runStringArg: String = ""
+				var runUuidArg: UUID = UUID()
+				var runArrayArg: [Int] = []
+				var runSetArg: Set<String> = []
+				var runDictArg: [String: Bool] = [:]
+				var runCustomArg: CustomType?
+				var runReturnValue: String = ""
+				func run(intArg: Int, stringArg: String, uuidArg: UUID, arrayArg: [Int], setArg: Set<String>, dictArg: [String: Bool], customArg: CustomType) -> String {
 					runCalled = true
 					runIntArg = intArg
 					runStringArg = stringArg
