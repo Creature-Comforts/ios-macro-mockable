@@ -306,9 +306,9 @@ struct FunctionDeclSyntaxComposer {
 	
 	private func getPrimitiveDefaultValue(_ type: String) -> PrimitiveTypeDefaultValue {
 		let fixedPrimitives: Set<String> = [
-			"Int", "Double", "Float", "Decimal", "CGFloat",
-			"CGSize", "CGRect", "CGPoint", "Bool", "URL",
-			"Data", "Date", "String", "UUID"
+			"Int", "Double", "Float", "Decimal", "Bool", "String",
+			"CGFloat", "CGSize", "CGRect", "CGPoint",
+			"URL", "Data", "Date", "UUID"
 		]
 		
 		if fixedPrimitives.contains(type) {
@@ -364,12 +364,5 @@ struct FunctionDeclSyntaxComposer {
 			}
 		}
 		return false
-	}
-}
-
-private extension String {
-	func capitalisingFirstLetter() -> String {
-		guard let first = first else { return self }
-		return first.uppercased() + dropFirst()
 	}
 }
