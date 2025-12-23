@@ -16,4 +16,9 @@ extension String {
 	func eraseSuffix(_ occurrence: String) -> Self {
 		hasSuffix(occurrence) ? replacingOccurrences(of: occurrence, with: "") : self
 	}
+	
+	func capitalisingFirstLetter() -> String {
+		guard let first = first else { return self }
+		return first.uppercased() + dropFirst()
+	}
 }

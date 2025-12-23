@@ -54,8 +54,8 @@ struct ProtocolDeclSyntaxComposer {
 		}
 		
 		var mockClass = """
-		\(accessLevel) class \(mockClassName): \(protoConformanceName)\(sendableConformance) {
-			\(accessLevel) init() { }
+		\(accessLevel.syntax)class \(mockClassName): \(protoConformanceName)\(sendableConformance) {
+			\(accessLevel.syntax)init() { }
 			
 			\(impl)
 		}
