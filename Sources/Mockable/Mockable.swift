@@ -2,6 +2,7 @@
 // https://docs.swift.org/swift-book
 
 public enum MockableAccessLevel {
+	case `open`
 	case `public`
 	case `internal`
 	case `private`

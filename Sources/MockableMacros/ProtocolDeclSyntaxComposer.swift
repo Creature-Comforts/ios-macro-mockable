@@ -152,6 +152,7 @@ struct ProtocolDeclSyntaxComposer {
 		"CustomStringConvertible", "CustomDebugStringConvertible",
 		"CaseIterable", "RawRepresentable",
 		"Sequence", "Collection", "IteratorProtocol",
+		"ObservableObject",
 	]
 
 	/// Protocol names from the inheritance clause that the child mock should
