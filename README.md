@@ -25,8 +25,27 @@ protocol APIService {
 
 | Argument | Default | Description |
 | --- | --- | --- |
-| `accessLevel` | `.public` | Access level of the generated mock (`.public`, `.internal`, `.private`). |
+| `accessLevel` | `.public` | Access level of the generated mock (`.open`, `.public`, `.internal`, `.private`). |
 | `associatedTypes` | `[]` | Concrete type names that replace the protocol's associated types in the mock, in declaration order. |
+
+### Access level
+
+`.open` makes the generated mock subclassable from another module — useful when consumers of your package need to subclass the mock. Because `open` is only valid on the class itself (initializers and stored properties can't be `open`), the macro emits an `open class` but keeps its members `public`, which is sufficient for cross-module subclassing:
+
+```swift
+@Mockable(accessLevel: .open)
+protocol APIService {
+	func fetchData() -> String
+}
+
+// Generates:
+// open class MockAPIService: APIService {
+//     public init() { }
+//     public var fetchDataCalled = false
+//     public var fetchDataReturnValue: String = ""
+//     public func fetchData() -> String { ... }
+// }
+```
 
 ## Associated & primary associated types
 
@@ -85,6 +104,6 @@ dog.bark()
 
 Notes:
 
-- Every inherited name is treated as a mockable parent (i.e. the mock will subclass `Mock<Name>`) **except** well-known standard-library conformances — `Sendable`, `AnyObject`, `Equatable`, `Hashable`, `Comparable`, `Identifiable`, `Codable`/`Encodable`/`Decodable`, `Error`, `CaseIterable`, `RawRepresentable`, and similar — which are ignored.
+- Every inherited name is treated as a mockable parent (i.e. the mock will subclass `Mock<Name>`) **except** well-known framework conformances — `Sendable`, `AnyObject`, `Equatable`, `Hashable`, `Comparable`, `Identifiable`, `Codable`/`Encodable`/`Decodable`, `Error`, `CaseIterable`, `RawRepresentable`, `ObservableObject`, and similar — which are ignored.
 - Swift allows a single superclass, so a protocol may inherit at most **one** mockable parent. Inheriting more than one (e.g. `Dog: Animal, Pet`) is a compile-time error; flatten the hierarchy or add the extra requirements to the mock manually.
 - If you inherit a custom protocol but don't apply `@Mockable` to it, the generated child mock will reference a non-existent `Mock<Parent>` superclass and fail to compile.

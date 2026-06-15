@@ -287,7 +287,7 @@ struct FunctionDeclSyntaxComposer {
 		case "CGPoint": return ExprSyntax("CGPoint.zero")
 		case "CGRect": return ExprSyntax("CGRect.zero")
 		case "Bool": return ExprSyntax("false")
-		case "URL": return ExprSyntax("URL(string: \"https://creaturecomforts.co.uk\")")
+		case "URL": return ExprSyntax("URL(string: \"https://creaturecomforts.co.uk\")!")
 		case "Data": return ExprSyntax("Data()")
 		case "Date": return ExprSyntax("Date()")
 		case "String": return ExprSyntax("\"\"")
