@@ -977,6 +977,34 @@ class MockableTests: XCTestCase {
 		)
 	}
 	
+	func test_Mockable_openAccessLevel() {
+		assertMacroExpansion(
+			"""
+			@Mockable(accessLevel: .open)
+			protocol MyService {
+				func run()
+			}
+			""",
+			expandedSource:
+			"""
+			protocol MyService {
+				func run()
+			}
+
+			open class MockMyService: MyService {
+				open init() {
+				}
+
+				open var runCalled = false
+				open func run() {
+					runCalled = true
+				}
+			}
+			""",
+			macros: ["Mockable": MockableMacro.self]
+		)
+	}
+
 	func test_Mockable_associatedType_primaryTypes_single() {
 		assertMacroExpansion(
 			"""
@@ -1460,6 +1488,34 @@ class MockableTests: XCTestCase {
 				var barkCalled = false
 				func bark() {
 					barkCalled = true
+				}
+			}
+			""",
+			macros: ["Mockable": MockableMacro.self]
+		)
+	}
+
+	func test_Mockable_inheritance_observableObjectParentIgnored() {
+		assertMacroExpansion(
+			"""
+			@Mockable
+			protocol MyService: ObservableObject {
+				func run()
+			}
+			""",
+			expandedSource:
+			"""
+			protocol MyService: ObservableObject {
+				func run()
+			}
+
+			class MockMyService: MyService {
+				init() {
+				}
+
+				var runCalled = false
+				func run() {
+					runCalled = true
 				}
 			}
 			""",

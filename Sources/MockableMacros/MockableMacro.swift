@@ -10,13 +10,15 @@ import SwiftSyntaxBuilder
 import SwiftSyntaxMacros
 
 public enum MockableMacroAccessLevel: String {
+	case `open`
 	case `public`
 	case `internal`
 	case `private`
-	
+
 	var syntax: String {
 		switch self {
 		case .internal: ""
+		case .open: "open "
 		case .public: "public "
 		case .private: "private "
 		}
