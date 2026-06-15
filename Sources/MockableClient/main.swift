@@ -18,3 +18,21 @@ protocol NetworkService<Response> {
 
 let networkService = MockNetworkService()
 networkService.fetchCalled = true
+
+// Protocol inheritance: apply @Mockable to each protocol in the chain. The
+// child mock subclasses the parent's generated mock (MockAnimal), inheriting
+// its mocked requirements.
+@Mockable
+protocol Animal {
+	func eat()
+}
+
+@Mockable
+protocol Dog: Animal {
+	func bark()
+}
+
+let dog = MockDog()
+dog.eat()          // inherited from MockAnimal
+dog.bark()
+print(dog.eatCalled, dog.barkCalled)

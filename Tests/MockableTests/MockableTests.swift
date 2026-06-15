@@ -1334,5 +1334,163 @@ class MockableTests: XCTestCase {
 			macros: ["Mockable": MockableMacro.self]
 		)
 	}
+
+	func test_Mockable_inheritance_single() {
+		assertMacroExpansion(
+			"""
+			@Mockable
+			protocol Animal {
+				func eat()
+			}
+			@Mockable
+			protocol Dog: Animal {
+				func bark()
+			}
+			""",
+			expandedSource:
+			"""
+			protocol Animal {
+				func eat()
+			}
+
+			class MockAnimal: Animal {
+				init() {
+				}
+
+				var eatCalled = false
+				func eat() {
+					eatCalled = true
+				}
+			}
+			protocol Dog: Animal {
+				func bark()
+			}
+
+			class MockDog: MockAnimal, Dog {
+				override init() {
+					super.init()
+				}
+
+				var barkCalled = false
+				func bark() {
+					barkCalled = true
+				}
+			}
+			""",
+			macros: ["Mockable": MockableMacro.self]
+		)
+	}
+
+	func test_Mockable_inheritance_sendableParent() {
+		assertMacroExpansion(
+			"""
+			@Mockable
+			protocol Dog: Animal, Sendable {
+				func bark()
+			}
+			""",
+			expandedSource:
+			"""
+			protocol Dog: Animal, Sendable {
+				func bark()
+			}
+
+			class MockDog: MockAnimal, Dog, @unchecked Sendable {
+				override init() {
+					super.init()
+				}
+
+				var barkCalled = false
+				func bark() {
+					barkCalled = true
+				}
+			}
+			""",
+			macros: ["Mockable": MockableMacro.self]
+		)
+	}
+
+	func test_Mockable_inheritance_publicAccessLevel() {
+		assertMacroExpansion(
+			"""
+			@Mockable(accessLevel: .public)
+			protocol Dog: Animal {
+				func bark()
+			}
+			""",
+			expandedSource:
+			"""
+			protocol Dog: Animal {
+				func bark()
+			}
+
+			public class MockDog: MockAnimal, Dog {
+				public override init() {
+					super.init()
+				}
+
+				public var barkCalled = false
+				public func bark() {
+					barkCalled = true
+				}
+			}
+			""",
+			macros: ["Mockable": MockableMacro.self]
+		)
+	}
+
+	func test_Mockable_inheritance_onlyDenylistedParentsAreIgnored() {
+		assertMacroExpansion(
+			"""
+			@Mockable
+			protocol Dog: Sendable, Equatable {
+				func bark()
+			}
+			""",
+			expandedSource:
+			"""
+			protocol Dog: Sendable, Equatable {
+				func bark()
+			}
+
+			class MockDog: Dog, @unchecked Sendable {
+				init() {
+				}
+
+				var barkCalled = false
+				func bark() {
+					barkCalled = true
+				}
+			}
+			""",
+			macros: ["Mockable": MockableMacro.self]
+		)
+	}
+
+	func test_Mockable_inheritance_multipleParents_emitsError() {
+		assertMacroExpansion(
+			"""
+			@Mockable
+			protocol Dog: Animal, Pet {
+				func bark()
+			}
+			""",
+			expandedSource:
+			"""
+			protocol Dog: Animal, Pet {
+				func bark()
+			}
+			""",
+			diagnostics: [
+				DiagnosticSpec(
+					message: "@Mockable cannot synthesize a mock inheriting from multiple mockable parents (Animal, Pet). Swift allows a single superclass only; flatten the hierarchy or add the extra requirements manually.",
+					line: 1,
+					column: 1,
+					severity: .error
+				)
+			],
+			macros: ["Mockable": MockableMacro.self]
+		)
+	}
 }
 #endif
