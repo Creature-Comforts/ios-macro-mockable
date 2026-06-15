@@ -45,18 +45,44 @@ struct ProtocolDeclSyntaxComposer {
 	) throws -> String {
 		let mockClassName = "Mock\(protoConformanceName)"
 		let impl = composeImpl(node, accessLevel, associatedTypes, typealiases)
-		
-		let sendableConformance: String
-		if !decl.isSendable() {
-			sendableConformance = ""
-		} else {
-			sendableConformance = ", @unchecked Sendable"
+
+		// Protocol inheritance: a child mock subclasses its parent's generated
+		// mock (Mock<Parent>) so it inherits the parent's mocked requirements.
+		// Swift allows a single superclass only, so more than one mockable
+		// parent is unsupported.
+		let mockableParents = extractMockableParents()
+		guard mockableParents.count <= 1 else {
+			context.diagnose(
+				Diagnostic(
+					node: Syntax(node),
+					message: MockableDiagnostic.multipleMockableParents(mockableParents)
+				)
+			)
+			return ""
 		}
-		
+		let superclass = mockableParents.first.map { "Mock\($0)" }
+
+		var inheritedTypes: [String] = []
+		if let superclass {
+			inheritedTypes.append(superclass)
+		}
+		inheritedTypes.append(protoConformanceName)
+		if decl.isSendable() {
+			inheritedTypes.append("@unchecked Sendable")
+		}
+		let inheritanceList = inheritedTypes.joined(separator: ", ")
+
+		let initDecl: String
+		if superclass != nil {
+			initDecl = "\(accessLevel.syntax)override init() {\n\t\tsuper.init()\n\t}"
+		} else {
+			initDecl = "\(accessLevel.syntax)init() { }"
+		}
+
 		var mockClass = """
-		\(accessLevel.syntax)class \(mockClassName): \(protoConformanceName)\(sendableConformance) {
-			\(accessLevel.syntax)init() { }
-			
+		\(accessLevel.syntax)class \(mockClassName): \(inheritanceList) {
+			\(initDecl)
+
 			\(impl)
 		}
 		"""
@@ -115,7 +141,31 @@ struct ProtocolDeclSyntaxComposer {
 	}
 	
 	// MARK: - Extract values
-	
+
+	/// Inherited names that are NOT user protocols carrying mockable
+	/// requirements, so they must not be treated as a mockable parent.
+	private static let nonMockableInheritedTypes: Set<String> = [
+		"Sendable", "AnyObject", "Any", "AnyHashable",
+		"Equatable", "Hashable", "Comparable", "Identifiable",
+		"Codable", "Encodable", "Decodable",
+		"Error", "LocalizedError",
+		"CustomStringConvertible", "CustomDebugStringConvertible",
+		"CaseIterable", "RawRepresentable",
+		"Sequence", "Collection", "IteratorProtocol",
+	]
+
+	/// Protocol names from the inheritance clause that the child mock should
+	/// subclass via `Mock<Name>`, excluding well-known stdlib conformances.
+	private func extractMockableParents() -> [String] {
+		decl.inheritanceClause?.inheritedTypes.compactMap { inherited -> String? in
+			let name = inherited.type.trimmedDescription
+			guard !Self.nonMockableInheritedTypes.contains(name) else {
+				return nil
+			}
+			return name
+		} ?? []
+	}
+
 	private func extractAccessLevelNodeArgument(_ node: AttributeSyntax) -> MockableMacroAccessLevel {
 		var accessLevel: MockableMacroAccessLevel = .internal
 		guard let arguments = node.arguments,
@@ -192,18 +242,26 @@ struct TypealiasInfo {
 
 enum MockableDiagnostic: DiagnosticMessage {
 	case notEnoughAssociatedTypes(Int, Int)
-	
+	case multipleMockableParents([String])
+
 	var message: String {
 		switch self {
 		case .notEnoughAssociatedTypes(let expected, let received):
 			return "Not enough associated type replacements declared: expected \(expected), received \(received)."
+		case .multipleMockableParents(let parents):
+			return "@Mockable cannot synthesize a mock inheriting from multiple mockable parents (\(parents.joined(separator: ", "))). Swift allows a single superclass only; flatten the hierarchy or add the extra requirements manually."
 		}
 	}
-	
+
 	var diagnosticID: MessageID {
-		MessageID(domain: "MockableMacro", id: "notEnoughAssociatedTypes")
+		switch self {
+		case .notEnoughAssociatedTypes:
+			return MessageID(domain: "MockableMacro", id: "notEnoughAssociatedTypes")
+		case .multipleMockableParents:
+			return MessageID(domain: "MockableMacro", id: "multipleMockableParents")
+		}
 	}
-	
+
 	var severity: DiagnosticSeverity {
 		.error
 	}
