@@ -1009,6 +1009,82 @@ class MockableTests: XCTestCase {
 		)
 	}
 	
+	func test_Mockable_associatedType_primaryTypes_usedInProperty() {
+		assertMacroExpansion(
+			"""
+			@Mockable(associatedTypes: ["CustomType"])
+			protocol MyService<PrimaryType> {
+				associatedtype PrimaryType
+				var current: PrimaryType { get }
+				func run() -> PrimaryType
+			}
+			""",
+			expandedSource:
+			"""
+			protocol MyService<PrimaryType> {
+				associatedtype PrimaryType
+				var current: PrimaryType { get }
+				func run() -> PrimaryType
+			}
+
+			class MockMyService: MyService {
+				init() {
+				}
+
+				var _current: CustomType!
+				var current: CustomType {
+					get {
+						_current
+					}
+					set {
+						_current = newValue
+					}
+				}
+
+				var runCalled = false
+				var runReturnValue: CustomType?
+				func run() -> CustomType {
+					runCalled = true
+					return runReturnValue!
+				}
+			}
+			""",
+			macros: ["Mockable": MockableMacro.self]
+		)
+	}
+
+	func test_Mockable_associatedType_primaryTypes_withWhereClause() {
+		assertMacroExpansion(
+			"""
+			@Mockable(associatedTypes: ["CustomType"])
+			protocol MyService<PrimaryType> where PrimaryType: Equatable {
+				associatedtype PrimaryType
+				func run() -> PrimaryType
+			}
+			""",
+			expandedSource:
+			"""
+			protocol MyService<PrimaryType> where PrimaryType: Equatable {
+				associatedtype PrimaryType
+				func run() -> PrimaryType
+			}
+
+			class MockMyService: MyService {
+				init() {
+				}
+
+				var runCalled = false
+				var runReturnValue: CustomType?
+				func run() -> CustomType {
+					runCalled = true
+					return runReturnValue!
+				}
+			}
+			""",
+			macros: ["Mockable": MockableMacro.self]
+		)
+	}
+
 	func test_Mockable_associatedType_single() {
 		assertMacroExpansion(
 			"""
