@@ -978,6 +978,8 @@ class MockableTests: XCTestCase {
 	}
 	
 	func test_Mockable_openAccessLevel() {
+		// `open` is only valid on the class itself; the init and members must
+		// be `public` (initializers/stored properties can't be `open`).
 		assertMacroExpansion(
 			"""
 			@Mockable(accessLevel: .open)
@@ -992,12 +994,85 @@ class MockableTests: XCTestCase {
 			}
 
 			open class MockMyService: MyService {
-				open init() {
+				public init() {
 				}
 
-				open var runCalled = false
-				open func run() {
+				public var runCalled = false
+				public func run() {
 					runCalled = true
+				}
+			}
+			""",
+			macros: ["Mockable": MockableMacro.self]
+		)
+	}
+
+	func test_Mockable_openAccessLevel_hasStoredProperty() {
+		// The non-optional property's stored backing var must be `public`,
+		// never `open` (stored properties can't be `open`).
+		assertMacroExpansion(
+			"""
+			@Mockable(accessLevel: .open)
+			protocol MyService {
+				var prop: Int { get }
+				func run()
+			}
+			""",
+			expandedSource:
+			"""
+			protocol MyService {
+				var prop: Int { get }
+				func run()
+			}
+
+			open class MockMyService: MyService {
+				public init() {
+				}
+
+				public var _prop: Int!
+				public var prop: Int {
+					get {
+						_prop
+					}
+					set {
+						_prop = newValue
+					}
+				}
+
+				public var runCalled = false
+				public func run() {
+					runCalled = true
+				}
+			}
+			""",
+			macros: ["Mockable": MockableMacro.self]
+		)
+	}
+
+	func test_Mockable_inheritance_openAccessLevel() {
+		// Cross-module subclassing needs an `open` class; the overriding init
+		// stays `public`.
+		assertMacroExpansion(
+			"""
+			@Mockable(accessLevel: .open)
+			protocol Dog: Animal {
+				func bark()
+			}
+			""",
+			expandedSource:
+			"""
+			protocol Dog: Animal {
+				func bark()
+			}
+
+			open class MockDog: MockAnimal, Dog {
+				public override init() {
+					super.init()
+				}
+
+				public var barkCalled = false
+				public func bark() {
+					barkCalled = true
 				}
 			}
 			""",
