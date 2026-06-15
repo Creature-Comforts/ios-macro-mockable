@@ -15,12 +15,24 @@ public enum MockableMacroAccessLevel: String {
 	case `internal`
 	case `private`
 
+	/// Access level for the generated mock's *class declaration*.
 	var syntax: String {
 		switch self {
 		case .internal: ""
 		case .open: "open "
 		case .public: "public "
 		case .private: "private "
+		}
+	}
+
+	/// Access level for the mock's *members* (init, stored properties, etc.).
+	/// `open` is only valid on the class itself and overridable members —
+	/// initializers and stored properties can't be `open` — so it is
+	/// downgraded to `public`, which is sufficient for cross-module use.
+	var memberSyntax: String {
+		switch self {
+		case .open: "public "
+		default: syntax
 		}
 	}
 }

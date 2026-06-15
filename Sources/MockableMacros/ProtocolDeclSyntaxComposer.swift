@@ -74,9 +74,9 @@ struct ProtocolDeclSyntaxComposer {
 
 		let initDecl: String
 		if superclass != nil {
-			initDecl = "\(accessLevel.syntax)override init() {\n\t\tsuper.init()\n\t}"
+			initDecl = "\(accessLevel.memberSyntax)override init() {\n\t\tsuper.init()\n\t}"
 		} else {
-			initDecl = "\(accessLevel.syntax)init() { }"
+			initDecl = "\(accessLevel.memberSyntax)init() { }"
 		}
 
 		var mockClass = """

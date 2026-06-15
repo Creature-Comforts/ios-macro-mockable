@@ -44,7 +44,7 @@ struct FunctionDeclSyntaxComposer {
 	
 	func generateFuncProperties() -> Self {
 		// Called tracking property
-		var props = ["\(accessLevel.syntax)var \(funcName)Called = false"]
+		var props = ["\(accessLevel.memberSyntax)var \(funcName)Called = false"]
 		
 		// Argument tracking properties (for all parameters)
 		let argProps = generateParameterProperties()
@@ -58,7 +58,7 @@ struct FunctionDeclSyntaxComposer {
 			} else {
 				optionalError = "Error"
 			}
-			let funcBodyThrow = "\t\(accessLevel.syntax)var \(funcName)Error: \(optionalError)?"
+			let funcBodyThrow = "\t\(accessLevel.memberSyntax)var \(funcName)Error: \(optionalError)?"
 			props.append(funcBodyThrow)
 		}
 		
@@ -159,7 +159,7 @@ struct FunctionDeclSyntaxComposer {
 		}
 		
 		let funcText = """
-		\(accessLevel.syntax)func \(funcName)(\(params))\(asyncStr)\(throwsStr)\(returnStr) {
+		\(accessLevel.memberSyntax)func \(funcName)(\(params))\(asyncStr)\(throwsStr)\(returnStr) {
 			\(funcBody)
 		}
 		"""
@@ -202,10 +202,10 @@ struct FunctionDeclSyntaxComposer {
 			let primitiveType = getPrimitiveDefaultValue(type)
 			switch primitiveType {
 			case .plain(let value), .array(let value), .set(let value), .dictionary(let value):
-				return "\(accessLevel.syntax)var \(funcName)\(argName): \(type) = \(value)"
+				return "\(accessLevel.memberSyntax)var \(funcName)\(argName): \(type) = \(value)"
 			case .notPrimitive:
 				type = convertToOptionalIfNeeded(type)
-				return "\(accessLevel.syntax)var \(funcName)\(argName): \(type)"
+				return "\(accessLevel.memberSyntax)var \(funcName)\(argName): \(type)"
 			}
 		}
 	}
@@ -249,10 +249,10 @@ struct FunctionDeclSyntaxComposer {
 		let defaultValue = getPrimitiveDefaultValue(type)
 		switch defaultValue {
 		case .plain(let value), .array(let value), .set(let value), .dictionary(let value):
-			return "\(accessLevel.syntax)var \(funcName)ReturnValue: \(type) = \(value)"
+			return "\(accessLevel.memberSyntax)var \(funcName)ReturnValue: \(type) = \(value)"
 		case .notPrimitive:
 			type = convertToOptionalIfNeeded(type)
-			return "\(accessLevel.syntax)var \(funcName)ReturnValue: \(type)"
+			return "\(accessLevel.memberSyntax)var \(funcName)ReturnValue: \(type)"
 		}
 	}
 	
