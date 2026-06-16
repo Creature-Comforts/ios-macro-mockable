@@ -1394,6 +1394,132 @@ class MockableTests: XCTestCase {
 		)
 	}
 	
+	func test_Mockable_existentialParameter_wrapsInParentheses() {
+		assertMacroExpansion(
+			"""
+			@Mockable
+			protocol MyService {
+				func run(item: any ItemSource)
+			}
+			""",
+			expandedSource:
+			"""
+			protocol MyService {
+				func run(item: any ItemSource)
+			}
+
+			class MockMyService: MyService {
+				init() {
+				}
+
+				var runCalled = false
+				var runItem: (any ItemSource)?
+				func run(item: any ItemSource) {
+					runCalled = true
+					runItem = item
+				}
+			}
+			""",
+			macros: ["Mockable": MockableMacro.self]
+		)
+	}
+
+	func test_Mockable_existentialReturn_wrapsInParentheses() {
+		assertMacroExpansion(
+			"""
+			@Mockable
+			protocol MyService {
+				func run() -> any ItemSource
+			}
+			""",
+			expandedSource:
+			"""
+			protocol MyService {
+				func run() -> any ItemSource
+			}
+
+			class MockMyService: MyService {
+				init() {
+				}
+
+				var runCalled = false
+				var runReturnValue: (any ItemSource)?
+				func run() -> any ItemSource {
+					runCalled = true
+					return runReturnValue!
+				}
+			}
+			""",
+			macros: ["Mockable": MockableMacro.self]
+		)
+	}
+
+	func test_Mockable_protocolCompositionParameter_wrapsInParentheses() {
+		assertMacroExpansion(
+			"""
+			@Mockable
+			protocol MyService {
+				func run(item: A & B)
+			}
+			""",
+			expandedSource:
+			"""
+			protocol MyService {
+				func run(item: A & B)
+			}
+
+			class MockMyService: MyService {
+				init() {
+				}
+
+				var runCalled = false
+				var runItem: (A & B)?
+				func run(item: A & B) {
+					runCalled = true
+					runItem = item
+				}
+			}
+			""",
+			macros: ["Mockable": MockableMacro.self]
+		)
+	}
+
+	func test_Mockable_typealias_notReplacedInsideLargerIdentifier() {
+		assertMacroExpansion(
+			"""
+			@Mockable
+			protocol MyService {
+				typealias Item = Int
+				func run(item: Item, summary: PKPaymentSummaryItem) -> Item
+			}
+			""",
+			expandedSource:
+			"""
+			protocol MyService {
+				typealias Item = Int
+				func run(item: Item, summary: PKPaymentSummaryItem) -> Item
+			}
+
+			class MockMyService: MyService {
+				init() {
+				}
+
+				var runCalled = false
+				var runItem: MyService.Item?
+				var runSummary: PKPaymentSummaryItem?
+				var runReturnValue: MyService.Item?
+				func run(item: MyService.Item, summary: PKPaymentSummaryItem) -> MyService.Item {
+					runCalled = true
+					runItem = item
+					runSummary = summary
+					return runReturnValue!
+				}
+			}
+			""",
+			macros: ["Mockable": MockableMacro.self]
+		)
+	}
+
 	func test_Mockable_primitivesCollections_assignDefaults() {
 		assertMacroExpansion(
 			"""

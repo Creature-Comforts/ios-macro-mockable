@@ -133,7 +133,7 @@ struct FunctionDeclSyntaxComposer {
 				
 				// Typealiases
 				typealiases.forEach {
-					overriddenType = overriddenType.replacingOccurrences(of: $0.name, with: "\(protocolName).\($0.name)")
+					overriddenType = overriddenType.replacingToken($0.name, with: "\(protocolName).\($0.name)")
 				}
 				
 				return "\(paramName): \(overriddenType)"
@@ -155,7 +155,7 @@ struct FunctionDeclSyntaxComposer {
 		
 		// Typealiases
 		typealiases.forEach {
-			returnStr = returnStr.replacingOccurrences(of: $0.name, with: "\(protocolName).\($0.name)")
+			returnStr = returnStr.replacingToken($0.name, with: "\(protocolName).\($0.name)")
 		}
 		
 		let funcText = """
@@ -195,7 +195,7 @@ struct FunctionDeclSyntaxComposer {
 			
 			// Typealiases
 			typealiases.forEach {
-				type = type.replacingOccurrences(of: $0.name, with: "\(protocolName).\($0.name)")
+				type = type.replacingToken($0.name, with: "\(protocolName).\($0.name)")
 			}
 			
 			// Determine default or optional
@@ -242,7 +242,7 @@ struct FunctionDeclSyntaxComposer {
 		
 		// Typealiases
 		typealiases.forEach {
-			type = type.replacingOccurrences(of: $0.name, with: "\(protocolName).\($0.name)")
+			type = type.replacingToken($0.name, with: "\(protocolName).\($0.name)")
 		}
 		
 		// Determine default or optional
@@ -257,12 +257,24 @@ struct FunctionDeclSyntaxComposer {
 	}
 	
 	private func convertToOptionalIfNeeded(_ type: String) -> String {
-		var optionalType = type
-		let isOptional = optionalType.hasSuffix("?")
-		if !isOptional {
-			optionalType += "?"
+		let trimmed = type.trimmingCharacters(in: .whitespacesAndNewlines)
+		guard !trimmed.hasSuffix("?") else { return trimmed }
+		// Existential (`any P`), opaque (`some P`) and protocol-composition
+		// (`A & B`) types must be wrapped in parentheses before appending `?`,
+		// otherwise the `?` binds to the trailing protocol and produces invalid
+		// Swift (e.g. `any UIActivityItemSource?`).
+		if needsParenthesesBeforeOptional(trimmed) {
+			return "(\(trimmed))?"
 		}
-		return optionalType
+		return "\(trimmed)?"
+	}
+
+	private func needsParenthesesBeforeOptional(_ type: String) -> Bool {
+		// Closure / already-parenthesized types are safe to suffix directly.
+		if type.hasPrefix("(") { return false }
+		if type.hasPrefix("any ") || type.hasPrefix("some ") { return true }
+		if type.contains(" & ") { return true }
+		return false
 	}
 	
 	private func name(from param: FunctionParameterListSyntax.Element, prefersSecondName: Bool = false) -> String {
