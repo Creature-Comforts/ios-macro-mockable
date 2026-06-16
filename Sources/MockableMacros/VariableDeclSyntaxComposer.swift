@@ -47,7 +47,7 @@ struct VariableDeclSyntaxComposer {
 				
 				// Typealiases
 				typealiases.forEach {
-					propertyType = propertyType.replacingOccurrences(of: $0.name, with: "\(protocolName).\($0.name)")
+					propertyType = propertyType.replacingToken($0.name, with: "\(protocolName).\($0.name)")
 				}
 				
 				let variableDefinition = "var \(propertyName): \(propertyType)"
